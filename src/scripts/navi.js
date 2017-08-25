@@ -1,12 +1,26 @@
 class Navi {
-	constructor(options) {
-		// options = {
-		// 	mainView: { key: 'string', options: 'object' },
-		// 	menuItems: [{ key: 'string', options: 'object', title: 'string' }],
-		// 	viewClasses: { key: { classObj: 'object', options: 'object', standAlone: 'boolean' } }
-		// }
 
-		window.debug('Navi.constructor()', options);
+	/**
+	 * @param {object} options
+	 *
+	 * @param {object} options.viewClasses - Data used to make new Navi Views
+	 * @param {object} options.viewClasses[key] - Object Key
+	 * @param {object} options.viewClasses[key].classObj - Class to instantiate.
+	 * @param {object} options.viewClasses[key].InitOptions - Initialization options.
+	 *
+	 * @param {object} options.mainView
+	 * @param {string} options.mainView.key
+	 * @param {object} options.mainView.showOptions
+	 *
+	 * @param {object[]} options.menuItems - Menu data.
+	 * @param {string} options.menuItems[].label - Menu label.
+	 * @param {object} options.menuItems[].viewClass - ViewClass data to link to.
+	 * @param {string} options.menuItems[].viewClass.key - Key.
+	 * @param {string} options.menuItems[].viewClass.showOptions - Show method Options.
+	 */
+	constructor(options) {
+		window.debug('=====');
+		window.debug('NAVI CONSTRUCTOR', arguments);
 
 		options = options || {};
 
@@ -15,14 +29,9 @@ class Navi {
 			options.viewClasses = {};
 		}
 		for (var k in options.viewClasses) {
-			options.viewClasses[k].key = k;
-			if (options.viewClasses[k].mainMenuTitle) {
-				this.menuItems.push({ key: k, title: options.viewClasses[k].mainMenuTitle });
-			}
+			const viewClass = options.viewClasses[k];
+			viewClass.key = k;
 		}
-
-		// DYNAMIC MENU ITEMS
-		this.dynamicMenuItems = [];
 
 		// COPY TO PROPERTIES
 		for (var k in options) {
@@ -32,12 +41,13 @@ class Navi {
 		// PLACEHOLDER PROPERTY
 		const _this = this;
 		this.$placeholder = $('<div>NAVI PLACEHOLDER</div>');
+		// TODO - NEED TO REPLACE WITH A MORE DIRECT CREATION CODE
 		this.$placeholder.on('click', function(e) {
 			const $target = $(e.target);
 			if ($target.is('[data-menuindex]')) {
 				const index = parseInt($target.attr('data-menuindex'));
 				const menuItem = _this.menuItems[index];
-				_this.render(menuItem.key, menuItem.options);
+				_this.render(menuItem.viewClass.key, menuItem.viewClass.showOptions);
 			}
 		});
 		$('#app-content-top > div').append(this.$placeholder);
@@ -46,35 +56,22 @@ class Navi {
 		this.lastView = null;
 
 		// CONTINUE TO RENDER
-		this.render();
+		this.openView();
 	}
 
-	render(key, options) {
-		window.debug('Navi.render()', key, options, this.lastView);
+	// --------------------------------------------------
 
-		// HIDE LAST VIEW
-		if (this.lastView) { this.lastView.hide(); }
-
-		// SHOW NEXT VIEW
-		if (!key || !this.viewClasses[key]) {
-			key = this.mainView.key;
-			options = this.mainView.options;
-		}
-
-		const viewClass = this.viewClasses[key];
-		const finalOptions = $.extend({}, viewClass.options, { key: key, navi: this });
-		const viewInstance = viewClass.classObj.factory(finalOptions);
-		viewInstance.show();
-		this.lastView = viewInstance;
+	render() {
+		window.debug('=====');
+		window.debug('NAVI RENDER METHOD');
 
 		// RENDER NAVI
-		window.debug('RENDER NAVI');
 		const templ = `
 			<p>TITLE - {{title}}</p>
 			{{#menuItems.length}}
 			<ul>
 				{{#menuItems}}
-				<li data-menuindex="{{index}}">{{title}}</li>
+				<li data-menuindex="{{index}}">{{label}}</li>
 				{{/menuItems}}
 			</ul>
 			{{/menuItems.length}}
@@ -85,16 +82,76 @@ class Navi {
 		}
 
 		const data = {
-			title: viewInstance.title,
+			title: this.lastView.title,
 			menuItems: this.menuItems
 		};
+
 		const html = Mustache.render(templ, data);
-		window.debug(html);
+		window.debug('html', html);
 		this.$placeholder.html(html);
 	}
 
-	closeView(key) {
-		this.viewClasses[key].classObj.remove(key);
+	// --------------------------------------------------
+
+	openView(options) {
+		window.debug('=====');
+		window.debug('NAVI OPEN VIEW METHOD', arguments);
+
+		options = options || {};
+
+		window.debug('viewObject:', options.viewObject);
+		window.debug('key:', options.key);
+		window.debug('showOptions:', options.showOptions);
+
+		let showOptions = options.showOptions;
+
+		// HIDE LAST VIEW IF IT EXISTS
+		if (this.lastView) {
+			this.lastView.hide();
+		}
+
+		let viewInstance;
+
+		if (options.viewObject) {
+			viewInstance = options.viewObject;
+		} else {
+			let key = options.key;
+
+			if (!key || !this.viewClasses[key]) {
+				key = this.mainView.key;
+				showOptions = this.mainView.showOptions;
+			}
+
+			const viewClass = this.viewClasses[key];
+			if (!viewClass.instance) {
+				const finalOptions = $.extend({}, viewClass.initOptions, {
+					key: key,
+					navi: this
+				});
+				viewClass.instance = new viewClass.classObj(finalOptions);
+			}
+
+			viewInstance = viewClass.instance;
+		}
+
+		this.lastView = viewInstance;
+		viewInstance.show(showOptions);
 		this.render();
+	}
+
+	closeView(options) {
+		window.debug('=====');
+		window.debug('NAVI CLOSE VIEW METHOD', arguments);
+
+		options = options || {};
+
+		if (options.key && this.viewClasses[options.key].instance) {
+			if (this.viewClasses[options.key].instance.destructor) {
+				this.viewClasses[options.key].instance.destructor();
+			}
+			this.viewClasses[options.key].instance = null;
+		}
+
+		this.openView();
 	}
 }
