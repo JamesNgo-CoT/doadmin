@@ -1,7 +1,8 @@
 class NaviView {
 	constructor(options) {
-		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + options.key + '\') CONSTRUCTOR', arguments);
+
+		// Debug marker.
+		window.debug('⚑ NAVI VIEW (\'' + options.classKey.replace(/\s*/g, '') + '_' + options.instanceKey.replace(/\s*/g, '') + '\') - CONSTRUCTOR', arguments);
 
 		if (!options || !options.classKey || !options.instanceKey || !options.navi) {
 			throw 'Error: Missing required arguments';
@@ -17,8 +18,9 @@ class NaviView {
 	}
 
 	destructor() {
-		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.className + '\') DESCRUCTOR METHOD', arguments);
+
+		// Debug marker.
+		window.debug('⚑ NAVI VIEW (\'' + this.className + '\') - DESTRUCTOR', arguments);
 
 		$('.' + this.className).detach();
 	}
@@ -26,22 +28,25 @@ class NaviView {
 	// --------------------------------------------------
 
 	render() {
-		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.className + '\') RENDER METHOD');
+
+		// Debug marker.
+		window.debug('⚑ NAVI VIEW (\'' + this.className + '\') - RENDER METHOD', arguments);
 	}
 
 	// --------------------------------------------------
 
 	hide() {
-		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.className + '\') HIDE METHOD');
+
+		// Debug marker.
+		window.debug('⚑ NAVI VIEW (\'' + this.className + '\') - HIDE METHOD', arguments);
 
 		$('.' + this.className).hide();
 	}
 
 	show(options) {
-		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.className + '\') SHOW METHOD', arguments);
+
+		// Debug marker.
+		window.debug('⚑ NAVI VIEW (\'' + this.className + '\') - HIDE METHOD', arguments);
 
 		$('.' + this.className).show();
 	}
