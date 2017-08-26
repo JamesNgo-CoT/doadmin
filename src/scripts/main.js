@@ -8,20 +8,20 @@ class DashNaviView extends NaviView {
 	render() {
 		super.render();
 
-		$('#app-content-top > div').append('<div class="' + this.options.key + '">NAVI VIEW</div>');
-		$('#app-content-left > div').append('<div class="' + this.options.key + '">NAVI VIEW</div>');
-		$('#app-content-right > div').append('<div class="' + this.options.key + '">NAVI VIEW</div>');
-		$('#app-content-bottom > div').append('<div class="' + this.options.key + '">NAVI VIEW <a href="#" class="btn btn-default">Next</a></div>');
+		$('#app-content-top > div').append('<div class="' + this.className + '">NAVI VIEW</div>');
+		$('#app-content-left > div').append('<div class="' + this.className + '">NAVI VIEW</div>');
+		$('#app-content-right > div').append('<div class="' + this.className + '">NAVI VIEW</div>');
+		$('#app-content-bottom > div').append('<div class="' + this.className + '">NAVI VIEW <a href="#" class="btn btn-default">Next</a></div>');
 
 		const _this = this;
-		$('#app-content-bottom > div .' + this.options.key + ' .btn').on('click', function(e) {
+		$('#app-content-bottom > div .' + this.className + ' .btn').on('click', function(e) {
 			e.preventDefault();
 
 			window.debug('==========');
 			window.debug('BUTTON CLICK', arguments);
 
-			const navi = _this.options.navi;
-			navi.openView({ key: _this.options.nextViewKey, showOptions: null, isNew: false });
+			const navi = _this.navi;
+			navi.openView({ classKey: _this.nextViewKey, showOptions: null, autoInstanceKey: true });
 		});
 	}
 }
@@ -35,16 +35,20 @@ class NaviView2 extends NaviView {
 	}
 
 	render() {
-		$('#app-content-top > div').append('<div class="' + this.options.key + '">NAVI VIEW 2</div>');
-		$('#app-content-left > div').append('<div class="' + this.options.key + '">NAVI VIEW 2</div>');
-		$('#app-content-right > div').append('<div class="' + this.options.key + '">NAVI VIEW 2</div>');
-		$('#app-content-bottom > div').append('<div class="' + this.options.key + '">NAVI VIEW 2 <a href="#" class="btn btn-default">CLOSE</a></div>');
+		$('#app-content-top > div').append('<div class="' + this.className + '">NAVI VIEW 2</div>');
+		$('#app-content-left > div').append('<div class="' + this.className + '">NAVI VIEW 2</div>');
+		$('#app-content-right > div').append('<div class="' + this.className + '">NAVI VIEW 2</div>');
+		$('#app-content-bottom > div').append('<div class="' + this.className + '">NAVI VIEW 2 <a href="#" class="btn btn-default">CLOSE</a></div>');
 
 		const _this = this;
-		$('#app-content-bottom > div .' + this.options.key + ' .btn').on('click', function(e) {
+		$('#app-content-bottom > div .' + this.className + ' .btn').on('click', function(e) {
 			e.preventDefault();
-			window.debug(_this.options.key);
-			_this.options.navi.closeView({ key: _this.options.key });
+
+			window.debug('==========');
+			window.debug('BUTTON CLICK', arguments);
+
+			// _this.navi.closeView({ classKey: _this.key });
+			_this.navi.closeView({ viewObject: _this });
 		});
 	}
 }
@@ -71,24 +75,22 @@ $(document).ready(function() {
 					classObj: DashNaviView,
 					initOptions: {
 						nextViewKey: 'altView'
-					},
-					standAlone: true
+					}
 				},
 				'altView': {
 					classObj: NaviView2,
-					initOptions: null,
-					standAlone: false
+					initOptions: null
 				}
 			},
 			menuItems: [{
 				label: 'MAIN VIEW',
 				viewClass: {
-					key: 'mainView',
+					classKey: 'mainView',
 					showOptions: null
 				}
 			}],
 			mainView: {
-				key: 'mainView',
+				classKey: 'mainView',
 				showOptions: null
 			}
 		});

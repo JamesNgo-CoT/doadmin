@@ -3,37 +3,46 @@ class NaviView {
 		window.debug('=====');
 		window.debug('NAVI VIEW (\'' + options.key + '\') CONSTRUCTOR', arguments);
 
+		if (!options || !options.classKey || !options.instanceKey || !options.navi) {
+			throw 'Error: Missing required arguments';
+		}
+
+		for (var k in options) {
+			this[k] = options[k];
+		}
+
+		this.className = this.classKey.replace(/\s*/g, '') + '_' + this.instanceKey.replace(/\s*/g, '');
+
 		this.title = 'NAVIVIEW';
-		this.options = options;
 	}
 
 	destructor() {
 		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.options.key + '\') DESCRUCTOR METHOD', arguments);
+		window.debug('NAVI VIEW (\'' + this.className + '\') DESCRUCTOR METHOD', arguments);
 
-		$('.' + this.options.key).detach();
+		$('.' + this.className).detach();
 	}
 
 	// --------------------------------------------------
 
 	render() {
 		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.options.key + '\') RENDER METHOD');
+		window.debug('NAVI VIEW (\'' + this.className + '\') RENDER METHOD');
 	}
 
 	// --------------------------------------------------
 
 	hide() {
 		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.options.key + '\') HIDE METHOD');
+		window.debug('NAVI VIEW (\'' + this.className + '\') HIDE METHOD');
 
-		$('.' + this.options.key).hide();
+		$('.' + this.className).hide();
 	}
 
 	show(options) {
 		window.debug('=====');
-		window.debug('NAVI VIEW (\'' + this.options.key + '\') SHOW METHOD', arguments);
+		window.debug('NAVI VIEW (\'' + this.className + '\') SHOW METHOD', arguments);
 
-		$('.' + this.options.key).show();
+		$('.' + this.className).show();
 	}
 }
