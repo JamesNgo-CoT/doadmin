@@ -338,14 +338,13 @@ class NaviBar extends Navi {
 	}
 }
 
-
+/** Base-class for complete NaviView objects. Subclass must include a call to the render method at the end of the class's constructor. */
 class NaviView {
-	// constructor(options) {
+
 	constructor(sourceKey, instanceKey, navi, initOptions) {
 
 		// Debug marker.
 		window.debug('⚑ NAVI VIEW - CONSTRUCTOR', arguments);
-		window.debug(sourceKey, instanceKey, navi, initOptions);
 
 		// if (!options || !options.sourceKey || !options.instanceKey || !options.navi) {
 		if (!sourceKey || !instanceKey || !navi) {
@@ -359,6 +358,8 @@ class NaviView {
 		this.initOptions = initOptions;
 		this.className = sourceKey.replace(/\s*/g, '') + '_' + instanceKey.replace(/\s*/g, '');
 		this.title = 'NAVIVIEW';
+
+		// this.render(); - Implement in subclass.
 	}
 
 	destructor() {
