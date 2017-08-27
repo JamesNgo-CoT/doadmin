@@ -1,6 +1,6 @@
 class DashNaviView extends NaviView {
-	constructor(options) {
-		super(options);
+	constructor(sourceKey, instanceKey, navi, initOptions) {
+		super(sourceKey, instanceKey, navi, initOptions);
 		this.title = 'DASH NAVI VIEW';
 		this.render();
 	}
@@ -17,18 +17,17 @@ class DashNaviView extends NaviView {
 		$('#app-content-bottom > div .' + this.className + ' .btn').on('click', function(e) {
 			e.preventDefault();
 
-			window.debug('==========');
 			window.debug('BUTTON CLICK', arguments);
 
 			const navi = _this.navi;
-			navi.openView({ classKey: _this.nextViewKey, showOptions: null, autoInstanceKey: true });
+			navi.openView(_this.initOptions.nextViewKey, null, null, true);
 		});
 	}
 }
 
 class NaviView2 extends NaviView {
-	constructor(options) {
-		super(options);
+	constructor(sourceKey, instanceKey, navi, initOptions) {
+		super(sourceKey, instanceKey, navi, initOptions);
 
 		this.title = 'NAVI VIEW 2';
 		this.render();
@@ -48,7 +47,7 @@ class NaviView2 extends NaviView {
 			window.debug('BUTTON CLICK', arguments);
 
 			// _this.navi.closeView({ classKey: _this.key });
-			_this.navi.closeView({ viewObject: _this });
+			_this.navi.closeView(_this);
 		});
 	}
 }
@@ -69,30 +68,28 @@ $(document).ready(function() {
 
 		cotApp.setTitle('');
 
-		navi = new Navi({
-			viewClasses: {
-				'mainView': {
-					classObj: DashNaviView,
-					initOptions: {
-						nextViewKey: 'altView'
-					}
-				},
-				'altView': {
-					classObj: NaviView2,
-					initOptions: null
+		navi = new NaviBar({
+			'mainView': {
+				classObject: DashNaviView,
+				initOptions: {
+					nextViewKey: 'altView'
 				}
 			},
-			menuItems: [{
-				label: 'MAIN VIEW',
-				viewClass: {
-					classKey: 'mainView',
-					showOptions: null
-				}
-			}],
-			mainView: {
-				classKey: 'mainView',
+			'altView': {
+				classObject: NaviView2,
+				initOptions: null
+			}
+		}, {
+			sourceKey: 'mainView',
+			showOptions: null,
+			instanceKey: null,
+			autoInstanceKey: false
+		}, [{
+			label: 'MAIN VIEW',
+			viewArguments: {
+				sourceKey: 'mainView',
 				showOptions: null
 			}
-		});
+		}])
 	});
 });

@@ -1,67 +1,51 @@
 #maincontent {
-	#naviBar {
-		.navbar {
-			.container-fluid {
-				padding-right: 15px;
-				padding-left: 15px;
-				margin-right: auto;
-				margin-left: auto;
+	.navbar {
+		.container-fluid {
+			padding-left: 15px;
+			padding-right: 15px;
+		}
 
-				form.navbar-form {
-					.form-group {
-						margin-bottom: 0;
-					}
+		.nav {
+			padding-left: 0;
+		}
 
-					.btn {
-						margin: 0;
-					}
+		.navbar-nav {
+			list-style: none;
+			overflow: visible;
+			margin: 7.5px -15px;
+
+			@media (min-width: 768px) {
+				margin: 0;
+			}
+
+			ul.dropdown-menu {
+				max-height: none;
+				padding-top: 9px;
+				padding-bottom: 9px;
+
+				li + li {
+					border-top: 0;
 				}
+			}
+		}
 
-				.navbar-right {
-					margin-right: -30px;
+		.navbar-form {
+			.form-group {
+				margin-bottom: 5px;
 
-					ul.navbar-nav {
-						list-style: none;
-						display: block;
-						overflow: visible;
-						padding-left: 0;
-
-						@media (min-width: 768px) {
-							float: left;
-							margin: 0;
-						}
-
-						li {
-							.dropdown-menu {
-								margin-top: 0;
-								border-top-left-radius: 0;
-								border-top-right-radius: 0;
-
-								width: auto;
-								padding: 9px 0;
-								margin: 0px;
-								max-height: none;
-								overflow-y: visible;
-							}
-
-							.dropdown-menu li + li {
-								border-top: 0;
-							}
-						}
-					}
-
-					img {
-						height: 30px;
-						box-sizing: content-box;
-						width: 30px;
-						padding: 10px 15px 10px 0;
-					}
-
-					.navbar-views,
-					.navbar-login {
-						margin-left: 15px;
-					}
+				@media (min-width: 768px) {
+					margin-bottom: 0;
 				}
+			}
+
+			button {
+				margin: 0;
+			}
+		}
+
+		.navbar-right {
+			@media (min-width: 768px) {
+				margin-right: -15px;
 			}
 		}
 	}
