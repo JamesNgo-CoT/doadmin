@@ -1,95 +1,142 @@
-class DashNaviView extends NaviView {
-	constructor(sourceKey, instanceKey, navi, initOptions) {
-		super(sourceKey, instanceKey, navi, initOptions);
-		this.title = 'DASH NAVI VIEW';
-		this.render();
-	}
-
-	render() {
-		super.render();
-
-		$('#app-content-top > div').append('<div class="' + this.className + '">NAVI VIEW</div>');
-		$('#app-content-left > div').append('<div class="' + this.className + '">NAVI VIEW</div>');
-		$('#app-content-right > div').append('<div class="' + this.className + '">NAVI VIEW</div>');
-		$('#app-content-bottom > div').append('<div class="' + this.className + '">NAVI VIEW <a href="#" class="btn btn-default">Next</a></div>');
-
-		const _this = this;
-		$('#app-content-bottom > div .' + this.className + ' .btn').on('click', function(e) {
-			e.preventDefault();
-
-			window.debug('BUTTON CLICK', arguments);
-
-			const navi = _this.navi;
-			navi.openView(_this.initOptions.nextViewKey, null, null, true);
-		});
-	}
-}
-
-class NaviView2 extends NaviView {
-	constructor(sourceKey, instanceKey, navi, initOptions) {
-		super(sourceKey, instanceKey, navi, initOptions);
-
-		this.title = 'NAVI VIEW 2';
-		this.render();
-	}
-
-	render() {
-		$('#app-content-top > div').append('<div class="' + this.className + '">NAVI VIEW 2</div>');
-		$('#app-content-left > div').append('<div class="' + this.className + '">NAVI VIEW 2</div>');
-		$('#app-content-right > div').append('<div class="' + this.className + '">NAVI VIEW 2</div>');
-		$('#app-content-bottom > div').append('<div class="' + this.className + '">NAVI VIEW 2 <a href="#" class="btn btn-default">CLOSE</a></div>');
-
-		const _this = this;
-		$('#app-content-bottom > div .' + this.className + ' .btn').on('click', function(e) {
-			e.preventDefault();
-
-			window.debug('==========');
-			window.debug('BUTTON CLICK', arguments);
-
-			// _this.navi.closeView({ classKey: _this.key });
-			_this.navi.closeView(_this);
-		});
-	}
-}
-
-// --------------------------------------------------
-
 let cotApp;
 let cotLogin;
 let navi;
 
 $(document).ready(function() {
-	window.debug('=====');
-	window.debug('DOCUMENT READY');
 
 	cotApp = new cot_app('doadmin');
 	cotApp.render(function() {
-		window.debug('cotApp.render()');
 
-		cotApp.setTitle('');
+		cotApp.setTitle('TEO Volunteer Admin');
 
-		navi = new NaviBar({
-			'mainView': {
-				classObject: DashNaviView,
-				initOptions: {
-					nextViewKey: 'altView'
+		cotLogin = new cot_login({
+			appName: 'c3app',
+			ccRoot: 'https://insideto-secure.toronto.ca',
+			welcomeSelector: null,
+			onReady: function(cot_login_instance) {
+				const viewSources = {
+					'loginView': {
+						classObject: null,
+						className: 'LoginView',
+						classUrl: 'scripts/naviview.loginview.js',
+						initOptions: null
+					},
+					'dashboardView': {
+						classObject: null,
+						className: 'TEODashView',
+						classUrl: 'scripts/naviview.teodashview.js',
+						initOptions: null
+					},
+					'volunteersView': {
+						classObject: null,
+						className: 'TEOVolunteersView',
+						classUrl: 'scripts/naviview.teovolunteersview.js',
+						initOptions: {
+							formView: 'volunteerFormView'
+						}
+					},
+					'volunteerFormView': {
+						classObject: null,
+						className: 'TEOVolunteerFormView',
+						classUrl: 'scripts/naviview.teovolunteersview.js',
+						initOptions: {
+							tableView: 'volunteersView'
+						}
+					},
+					'eventsView': {
+						classObject: null,
+						className: 'TEOEventsView',
+						classUrl: 'scripts/naviview.teoeventsview.js',
+						initOptions: {
+							formViewSourceKey: 'eventFormView'
+						}
+					},
+					'eventFormView': {
+						classObject: null,
+						className: 'TEOEventFormView',
+						classUrl: 'scripts/naviview.teoeventsview.js',
+						initOptions: null
+					},
+					'registrationsView': {
+						classObject: null,
+						className: 'TEORegistrationsView',
+						classUrl: 'scripts/naviview.teoregistrationsview.js',
+						initOptions: null
+					},
+					'administrationView': {
+						classObject: null,
+						className: 'TEOAdministrationView',
+						classUrl: 'scripts/naviview.teoadministrationsview.js',
+						initOptions: null
+					}
+				};
+
+				// const defaultViewArguments = {
+				// 	sourceKey: 'dashboardView',
+				// 	showOptions: null,
+				// 	instanceKey: null,
+				// 	autoInstanceKey: false
+				// };
+				// TODO - Temporary Only. Restore above comments
+				const defaultViewArguments = {
+					sourceKey: 'volunteerFormView',
+					showOptions: { operation: 'new' },
+					instanceKey: 'add',
+					autoInstanceKey: false
+				};
+
+				const menuItems = [{
+						label: 'Dashboard',
+						viewArguments: {
+							sourceKey: 'dashboardView',
+							showOptions: null
+						}
+					},
+					{
+						label: 'Volunteers',
+						viewArguments: {
+							sourceKey: 'volunteersView',
+							showOptions: null
+						}
+					},
+					{
+						label: 'Events',
+						viewArguments: {
+							sourceKey: 'eventsView',
+							showOptions: null
+						}
+					},
+					{
+						label: 'Registrations',
+						viewArguments: {
+							sourceKey: 'registrationsView',
+							showOptions: null
+						}
+					}, {
+						label: 'Administration',
+						viewArguments: {
+							sourceKey: 'administrationView',
+							showOptions: null
+						}
+					}
+				];
+
+				const loginRequired = true;
+
+				const loginViewArguments = {
+					sourceKey: 'loginView',
+					showOptions: null,
+					instanceKey: null,
+					autoInstanceKey: false
+				};
+
+				navi = new NaviBar(viewSources, defaultViewArguments, menuItems, cotLogin, loginRequired, loginViewArguments);
+			},
+			onLogin: function(cot_login_instance) {
+				if (navi) {
+					navi.closeView(navi.lastViewObject);
 				}
 			},
-			'altView': {
-				classObject: NaviView2,
-				initOptions: null
-			}
-		}, {
-			sourceKey: 'mainView',
-			showOptions: null,
-			instanceKey: null,
-			autoInstanceKey: false
-		}, [{
-			label: 'MAIN VIEW',
-			viewArguments: {
-				sourceKey: 'mainView',
-				showOptions: null
-			}
-		}])
+		});
 	});
 });
