@@ -33,7 +33,7 @@ class LoginView extends NaviView {
 		const _this = this;
 		$('a', this.$topRegion).on('click', function(e) {
 			e.preventDefault();
-			_this.cotLogin.showLogin();
+			_this.initOptions.cotLogin.showLogin();
 		});
 	}
 }

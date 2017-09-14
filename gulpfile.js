@@ -41,7 +41,7 @@ const imageDir = 'img';
 const scriptDir = 'scripts';
 const styleDir = 'styles';
 //where is this app deployed? can be overridden locally in your env file
-const devDeployPath = 'x:\\secure\\docs\\webapps\\doadmin\\';
+const devDeployPath = 'Z:\\webapps\\work\\james\\teovolunteer';
 const qaDeployPath = 'x:\\webas\\lib\\webapps\\secure\\doadmin\\';
 
 //should we minify stuff during tasks? this is set to true in deploy tasks

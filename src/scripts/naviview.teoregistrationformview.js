@@ -27,6 +27,7 @@ class TEORegistrationFormView extends NaviView {
 				<span class="btns-update">
 					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
 					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
 				</span>
 				<span class="btns-preview">
 					<button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button>
@@ -87,6 +88,7 @@ class TEORegistrationFormView extends NaviView {
 				<span class="btns-update">
 					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
 					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
 				</span>
 				<span class="btns-preview">
 					<button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button>
@@ -112,7 +114,7 @@ class TEORegistrationFormView extends NaviView {
 			_this.navi.openView(_this.showOpts.returnView, {
 				reload: true
 			});
-			_this.navi.closeView(this);
+			_this.navi.closeView(_this);
 		});
 
 		$('.btns-new .btn-create', this.$topRegion).on('click', function(e) {
@@ -126,12 +128,17 @@ class TEORegistrationFormView extends NaviView {
 			_this.navi.openView(_this.showOpts.returnView, {
 				reload: true
 			});
-			_this.navi.closeView(this);
+			_this.navi.closeView(_this);
 		});
 
 		$('.btns-update .btn-save', this.$topRegion).on('click', function(e) {
 			e.preventDefault();
 			_this.action_update();
+		});
+
+		$('.btns-update .btn-delete', this.$topRegion).on('click', function(e) {
+			e.preventDefault();
+			_this.action_delete();
 		});
 
 		$('#eventSection .row.buttons .btn-change', this.$topRegion).on('click', function(e) {
@@ -430,11 +437,15 @@ class TEORegistrationFormView extends NaviView {
 				this.data[k] = this.volunteerData[k];
 			}
 
+			$(':input').prop('disabled', true);
 			const _this = this;
 			const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration';
 			$.ajax(url, {
 				headers: {
 					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+				},
+				complete: function() {
+					$(':input').prop('disabled', false);
 				},
 				contentType: 'application/json; charset=utf-8',
 				data: JSON.stringify(_this.data),
@@ -471,11 +482,15 @@ class TEORegistrationFormView extends NaviView {
 				this.data[k] = this.volunteerData[k];
 			}
 
+			$(':input').prop('disabled', true);
 			const _this = this;
 			const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration(\'' + id + '\')';
 			$.ajax(url, {
 				headers: {
 					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+				},
+				complete: function() {
+					$(':input').prop('disabled', false);
 				},
 				contentType: 'application/json; charset=utf-8',
 				data: JSON.stringify(_this.data),
@@ -494,6 +509,33 @@ class TEORegistrationFormView extends NaviView {
 		} else {
 			alert('Missing information.');
 		}
+	}
+
+	action_delete() {
+		$(':input').prop('disabled', true);
+		const _this = this;
+		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration(\'' + this.data.id + '\')';
+		$.ajax(url, {
+			headers: {
+				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+			},
+			complete: function() {
+				$(':input').prop('disabled', false);
+			},
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify({ __Status: 'DEL'}),
+			dataType: 'JSON',
+			error: function error(jqXHR, textStatus, errorThrown) {
+				alert('An error has occured. ', errorThrown);
+			},
+			method: 'PATCH',
+			success: function success() { // (data, textStatus, jqXHR) {
+				alert('Registration Deleted');
+				_this.navi.openView(_this.showOpts.returnView, {
+					reload: true
+				});
+			}
+		});
 	}
 
 	action_getData(id, cbk) {
@@ -564,57 +606,65 @@ class TEORegistrationFormView extends NaviView {
 
 
 
-	action_submit(model) {
-		if (this.id) {
-			this.action_submitPutRecord(model);
-		} else {
-			this.action_submitPostRecord(model);
-		}
-	}
-
-	action_submitPutRecord(model) {
-		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + this.id + '\')';
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(model.toJSON()),
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
-			},
-			method: 'PUT',
-			success: function success() { // (data, textStatus, jqXHR) {
-				alert('Event Updated');
-			}
-		});
-	}
-
-	action_submitPostRecord(model) {
-		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event';
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(model.toJSON()),
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
-			},
-			method: 'POST',
-			success: function success(data) { // , textStatus, jqXHR) {
-				_this.show({
-					operation: 'update',
-					data: data,
-					returnView: _this.returnView
-				});
-				_this.navi.render();
-				window.alert('Event Added');
-			}
-		});
-	}
+	// action_submit(model) {
+	// 	if (this.id) {
+	// 		this.action_submitPutRecord(model);
+	// 	} else {
+	// 		this.action_submitPostRecord(model);
+	// 	}
+	// }
+	//
+	// action_submitPutRecord(model) {
+	// 	$(':input').prop('disabled', true);
+	// 	const _this = this;
+	// 	const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + this.id + '\')';
+	// 	$.ajax(url, {
+	// 		headers: {
+	// 			'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+	// 		},
+	// 		complete: function() {
+	// 			$(':input').prop('disabled', false);
+	// 		},
+	// 		contentType: 'application/json; charset=utf-8',
+	// 		data: JSON.stringify(model.toJSON()),
+	// 		dataType: 'JSON',
+	// 		error: function error(jqXHR, textStatus, errorThrown) {
+	// 			alert('An error has occured. ', errorThrown);
+	// 		},
+	// 		method: 'PUT',
+	// 		success: function success() { // (data, textStatus, jqXHR) {
+	// 			alert('Event Updated');
+	// 		}
+	// 	});
+	// }
+	//
+	// action_submitPostRecord(model) {
+	// 	$(':input').prop('disabled', true);
+	// 	const _this = this;
+	// 	const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event';
+	// 	$.ajax(url, {
+	// 		headers: {
+	// 			'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+	// 		},
+	// 		complete: function() {
+	// 			$(':input').prop('disabled', false);
+	// 		},
+	// 		contentType: 'application/json; charset=utf-8',
+	// 		data: JSON.stringify(model.toJSON()),
+	// 		dataType: 'JSON',
+	// 		error: function error(jqXHR, textStatus, errorThrown) {
+	// 			alert('An error has occured. ', errorThrown);
+	// 		},
+	// 		method: 'POST',
+	// 		success: function success(data) { // , textStatus, jqXHR) {
+	// 			_this.show({
+	// 				operation: 'update',
+	// 				data: data,
+	// 				returnView: _this.returnView
+	// 			});
+	// 			_this.navi.render();
+	// 			window.alert('Event Added');
+	// 		}
+	// 	});
+	// }
 }

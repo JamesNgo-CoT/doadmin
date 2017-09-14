@@ -37,12 +37,6 @@ class Navi {
 	 * @param {function} argument[4] as callback - Optional.
 	 */
 	openView() {
-
-		// Check requirement.
-		if (!arguments[0]) {
-			throw 'Error: Navi openView() method missing required arguments (argument[0]).';
-		}
-
 		// Hide last NavView object.
 		if (this.lastViewObject) {
 			this.lastViewObject.hide();

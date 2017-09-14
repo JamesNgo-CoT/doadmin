@@ -1,5 +1,5 @@
 /* exported TEOVolunteerFormView */
-/* global NaviView CotForm2 moment */
+/* global NaviView CotForm2 moment DataTablesODataBridge */
 
 class TEOVolunteerFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -627,7 +627,28 @@ class TEOVolunteerFormView extends NaviView {
 					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Update</button>
 					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
 				</p>
+
+				<div id="volunteerSection" class="panel panel-info">
+					<div class="panel-heading">
+						<h3>Volunteer Registration</h3>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-xs-12">
+								<table id="` + _this.className + `_dt" style="width: 100%;"></table>
+							</div>
+						</div>
+					</div>
+				</div>
 			`);
+
+			if (model.get('vAppStatus') == 'Approved' && model.get('vStatus') == 'Active') {
+				$('#' + _this.className + '_dt').after('<p><button type="button" class="btn btn-default btn-register">Register</button></p>');
+				$('.btn-register', _this.$topRegion).on('click', function(e) {
+					e.preventDefault();
+					_this.navi.openView(_this.initOptions.registrationForm, { returnView: _this, volunteerData: model.toJSON() }, null, true);
+				})
+			}
 
 			$('.btn-close', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
@@ -650,9 +671,91 @@ class TEOVolunteerFormView extends NaviView {
 				_this.action_delete(model);
 			});
 
+
+
 			_this.form = new CotForm2(previewFormDef);
 			_this.form.render('.' + _this.className + '_formWrapper');
 			// _this.form.setModel(model);
+
+			// DATATABLE
+			const bridge = new DataTablesODataBridge();
+			_this.dt = $('#' + _this.className + '_dt').DataTable({
+				dom: '<\'row\'<\'col-sm-6\'l><\'col-sm-6\'f>>' + '<\'row\'<\'col-sm-12\'tr>>' + '<\'row\'<\'col-sm-5\'i><\'col-sm-7\'p>>B',
+				buttons: [
+					'copy', 'csv', 'excel', 'pdf', 'print'
+				],
+				columns: [
+				// {
+				// 	data: 'id',
+				// 	checkboxes: {
+				// 		'selectRow': true
+				// 	},
+				// 	orderable: false
+				// },
+				{
+					data: 'rEName',
+					title: 'Event Name',
+					default: ''
+				}, {
+					data: 'rETypeOf',
+					title: 'Event Type',
+					default: ''
+				}, {
+					data: 'rEDate',
+					title: 'Event Date',
+					default: ''
+				}, {
+					data: 'vLName',
+					title: 'Volunteer',
+					default: '',
+					render: function(data, type, row) {
+						return row.vLName + ', ' + row.vFName;
+					}
+				}, {
+					data: 'vLName',
+					title: 'Last Name',
+					default: '',
+					visible: false
+				}, {
+					data: 'vFName',
+					title: 'First Name',
+					default: '',
+					visible: false
+				}, {
+					data: 'id',
+					title: 'Action',
+					render: function() {
+						return '<button type="button" class="btn btn-default">View</button>'
+					}
+				}],
+				// order: [
+				// 	[2, "asc"]
+				// ],
+				// 'select': {
+				// 	'style': 'multi'
+				// },
+				"serverSide": true,
+				ajax: {
+					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and mainId eq \'' + model.get('id') + '\'',
+					data: bridge.data(),
+					dataFilter: bridge.dataFilter()
+				}
+			});
+			$('#' + _this.className + '_dt tbody').on('click', function(e) {
+				if ($(e.target).is('.btn')) {
+					e.preventDefault();
+					var data = _this.dt.row($(e.target).closest('tr')).data();
+					const sourceKey = _this.initOptions.registrationForm;
+					const showOptions = {
+						operation: 'view',
+						id: data.id,
+						returnView: _this
+					};
+					const instanceKey = null;
+					const autoInstanceKey = true;
+					_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+				}
+			});
 		}
 
 		if (showOpts.data) {
@@ -681,6 +784,10 @@ class TEOVolunteerFormView extends NaviView {
 				this.returnView = options.returnView;
 			}
 
+			if (options.reload && this.dt) {
+				this.dt.ajax.reload(null, false);
+			}
+
 			if (options.operation) {
 				switch (options.operation) {
 					case 'new':
@@ -698,6 +805,8 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	action_delete(model) {
+		$(':input').prop('disabled', true);
+
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + this.id + '\')';
 		const data = $.extend({}, model.toJSON());
@@ -706,6 +815,9 @@ class TEOVolunteerFormView extends NaviView {
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+			},
+			complete: function() {
+				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
 			data: JSON.stringify(data),
@@ -733,11 +845,15 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	putRecord(model) {
+		$(':input').prop('disabled', true);
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + this.id + '\')';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+			},
+			complete: function() {
+				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
 			data: JSON.stringify(model.toJSON()),
@@ -753,11 +869,15 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	postRecord(model) {
+		$(':input').prop('disabled', true);
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+			},
+			complete: function() {
+				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
 			data: JSON.stringify(model.toJSON()),
@@ -767,13 +887,13 @@ class TEOVolunteerFormView extends NaviView {
 			},
 			method: 'POST',
 			success: function success(data) { // , textStatus, jqXHR) {
+				window.alert('Volunteer Added');
 				_this.show({
 					operation: 'update',
 					data: data,
 					returnView: _this.returnView
 				});
 				_this.navi.render();
-				window.alert('Volunteer Added');
 			}
 		});
 	}

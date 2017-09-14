@@ -98,7 +98,7 @@ class TEOAdministrationView extends NaviView {
 				<div class="{{classname}}_formWrapper"></div>
 
 				<p>
-					<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancelm</button>
+					<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
 					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
 				</p>
 			`;
@@ -125,6 +125,7 @@ class TEOAdministrationView extends NaviView {
 	}
 
 	action_submit() {
+		$(':input').prop('disabled', true);
 		const data = {
 			ConfigContent: btoa(JSON.stringify(this.model.toJSON())),
 			ContentType:"application/json",
@@ -135,6 +136,9 @@ class TEOAdministrationView extends NaviView {
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+			},
+			complete: function() {
+				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
 			data: JSON.stringify(data),

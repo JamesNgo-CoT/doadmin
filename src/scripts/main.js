@@ -44,7 +44,8 @@ $(document).ready(function() {
 						className: 'TEOVolunteerFormView',
 						classUrl: 'scripts/naviview.teovolunteersview.js',
 						initOptions: {
-							tableView: 'volunteersView'
+							tableView: 'volunteersView',
+							registrationForm: 'registrationFormView'
 						}
 					},
 					'eventsView': {
@@ -59,7 +60,9 @@ $(document).ready(function() {
 						classObject: null,
 						className: 'TEOEventFormView',
 						classUrl: 'scripts/naviview.teoeventsview.js',
-						initOptions: null
+						initOptions: {
+							registrationForm: 'registrationFormView'
+						}
 					},
 					'registrationsView': {
 						classObject: null,
