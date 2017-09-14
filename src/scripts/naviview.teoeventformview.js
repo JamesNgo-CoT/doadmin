@@ -242,7 +242,7 @@ class TEOEventFormView extends NaviView {
 		});
 	}
 
-	show_updateVolunteer(showOpts) {
+	show_updateEvent(showOpts) {
 		const _this = this;
 
 		function renderUpdateVolunteer(model) {
@@ -304,7 +304,7 @@ class TEOEventFormView extends NaviView {
 		}
 	}
 
-	show_viewVolunteer(showOpts) {
+	show_viewEvent(showOpts) {
 		const _this = this;
 
 		function renderViewVolunteer(model) {
@@ -389,10 +389,10 @@ class TEOEventFormView extends NaviView {
 						this.show_newEvent(options);
 						break;
 					case 'view':
-						this.show_viewVolunteer(options);
+						this.show_viewEvent(options);
 						break;
 					case 'update':
-						this.show_updateVolunteer(options);
+						this.show_updateEvent(options);
 						break;
 				}
 			}
