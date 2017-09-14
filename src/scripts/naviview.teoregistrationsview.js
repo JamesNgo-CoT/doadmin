@@ -120,6 +120,11 @@ class TEORegistrationsView extends NaviView {
 					return row.vLName + ', ' + row.vFName;
 				}
 			}, {
+				data: 'vLName',
+				title: 'Last Name',
+				default: '',
+				visible: false
+			}, {
 				data: 'vFName',
 				title: 'First Name',
 				default: '',

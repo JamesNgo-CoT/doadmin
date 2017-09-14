@@ -265,6 +265,14 @@ class TEORegistrationFormView extends NaviView {
 			// Preview or Update
 			if (this.showOpts.preview) {
 				// Preview
+				this.title = 'Registration';
+
+				if (this.showOpts.id) {
+					this.action_getData(this.showOpts.id, proceedPreview);
+				} else {
+					this.data = this.showOpts.data;
+					proceedPreview();
+				}
 			} else {
 				// Update
 				this.title = 'Update Registration';
@@ -275,7 +283,6 @@ class TEORegistrationFormView extends NaviView {
 					this.data = this.showOpts.data;
 					proceedUpdate();
 				}
-
 			}
 		} else {
 			// New
