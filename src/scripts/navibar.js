@@ -1,3 +1,6 @@
+/* exported NaviBar */
+/* global Navi NaviView Mustache */
+
 class NaviBar extends Navi {
 
 	/**
@@ -15,11 +18,11 @@ class NaviBar extends Navi {
 		}
 
 		if (cotLogin) {
-			for (var i = 0, l = viewSources.length; i < l; i++) {
-				if (!viewSources[i].initOptions) {
-					viewSources[i].initOptions = {};
+			for (let k in viewSources) {
+				if (!viewSources[k].initOptions) {
+					viewSources[k].initOptions = {};
 				}
-				viewSources[i].initOptions.cotLogin = cotLogin;
+				viewSources[k].initOptions.cotLogin = cotLogin;
 			}
 		}
 
@@ -46,7 +49,7 @@ class NaviBar extends Navi {
 		let $navBar;
 		let height;
 		let pointOfChange;
-		$(window).on('scroll', function(e) {
+		$(window).on('scroll', function() { // (e) {
 			const scrollTop = $(this).scrollTop();
 			$navBar = $navBar || $('.navbar', _this.$placeholder);
 			height = height || _this.$placeholder.height();
@@ -75,6 +78,7 @@ class NaviBar extends Navi {
 	 */
 	openView() {
 		const _this = this;
+
 		function done() {
 			_this.render();
 			if (callback) {
@@ -127,15 +131,13 @@ class NaviBar extends Navi {
 	 */
 	closeView(viewObject) {
 		for (let i = 0, l = this.dynamicMenuItems.length; i < l; i++) {
-			if (viewObject == this.dynamicMenuItems[i].viewObject) {
+			if (viewObject == this.dynamicMenuItems[i]) {
 				this.dynamicMenuItems.splice(i, 1);
 				break;
 			}
 		}
-
 		super.closeView(viewObject);
-
-		this.openView();
+		this.render();
 	}
 
 	/**
@@ -144,9 +146,13 @@ class NaviBar extends Navi {
 	 */
 	createView(sourceKey, instanceKey, callback) {
 		const _this = this;
+
 		function done() {
 			const viewSource = _this.viewSources[sourceKey];
-			_this.dynamicMenuItems.push(viewSource.instances[instanceKey]);
+			const viewInstance = viewSource.instances[instanceKey];
+			if (viewInstance.inDynamicMenu != false) {
+				_this.dynamicMenuItems.push(viewInstance);
+			}
 			if (callback) {
 				callback();
 			}
@@ -177,7 +183,7 @@ class NaviBar extends Navi {
 							<span class="icon-bar"></span>
 							<span class="icon-bar"></span>
 						</button>
-						<a class="navbar-brand" href="#">{{viewObject.title}}</a>
+						<a class="navbar-brand">{{viewObject.title}}</a>
 					</div>
 
 					<!-- Collect the nav links, forms, and other content for toggling -->
@@ -195,6 +201,7 @@ class NaviBar extends Navi {
 							{{/search}}
 
 							{{#contextualMenuItems.length}}
+							<!--
 							<ul class="nav navbar-nav">
 								{{#contextualMenuItems}}
 									<li class="nav-item dropdown">
@@ -207,6 +214,7 @@ class NaviBar extends Navi {
 									</li>
 								{{/contextualMenuItems}}
 							</ul>
+							-->
 							{{/contextualMenuItems.length}}
 
 							{{#actionMenuItems.length}}
@@ -215,7 +223,12 @@ class NaviBar extends Navi {
 									<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Actions <span class="caret"></span></a>
 									<ul class="dropdown-menu">
 										{{#actionMenuItems}}
-										<li class="actionMenuItem"><a href="#">{{label}}</a></li>
+											{{#separator}}
+											<li class="actionMenuItem divider" role="separator"></li>
+											{{/separator}}
+											{{^separator}}
+											<li class="actionMenuItem"><a href="#">{{label}}</a></li>
+											{{/separator}}
 										{{/actionMenuItems}}
 									</ul>
 								</li>
@@ -306,8 +319,14 @@ class NaviBar extends Navi {
 		});
 
 		// Action Menu items event handler.
-		$('.actionMenuItem > a', this.$placeholder).each(function(i) {
-			$(this).on('click', function(e) {
+		// $('.actionMenuItem > a', this.$placeholder).each(function(i) {
+		// 	$(this).on('click', function(e) {
+		// 		e.preventDefault();
+		// 		_this.lastViewObject.actionMenuItems[i].action();
+		// 	});
+		// });
+		$('.actionMenuItem', this.$placeholder).each(function(i) {
+			$(this).children('a').on('click', function(e) {
 				e.preventDefault();
 				_this.lastViewObject.actionMenuItems[i].action();
 			});
@@ -331,11 +350,11 @@ class NaviBar extends Navi {
 			});
 		});
 
-		$('.navLogin > a', this.$placeholder).on('click', function(e) {
+		$('.navLogin > a', this.$placeholder).on('click', function() { // (e) {
 			_this.cotLogin.showLogin();
 		});
 
-		$('.navLogout > a', this.$placeholder).on('click', function(e) {
+		$('.navLogout > a', this.$placeholder).on('click', function() { // (e) {
 			_this.cotLogin.logout();
 		});
 	}

@@ -1,3 +1,5 @@
+/* exported NaviView */
+
 class NaviView {
 
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -15,7 +17,7 @@ class NaviView {
 		this.className = sourceKey.replace(/\s*/g, '') + '_' + instanceKey.replace(/\s*/g, '');
 		this.title = 'NAVIVIEW';
 
-		this.cotLogin = cotLogin;
+		// this.cotLogin = cotLogin;
 
 		this.$topRegion = null;
 		this.$leftRegion = null;
@@ -30,11 +32,13 @@ class NaviView {
 	}
 
 	hide() {
-		$('.' + this.className).hide();
+		//$('.' + this.className).hide();
+		$('.' + this.className).fadeOut();
 	}
 
-	show(showOptions) {
-		$('.' + this.className).show();
+	show() { // (showOptions) {
+		//$('.' + this.className).show();
+		$('.' + this.className).fadeIn();
 	}
 
 	render() {

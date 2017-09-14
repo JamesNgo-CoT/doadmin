@@ -1,3 +1,6 @@
+/* exported Navi */
+/* global NaviView */
+
 class Navi {
 
 	/**
@@ -83,9 +86,8 @@ class Navi {
 
 			const viewSource = this.viewSources[sourceKey];
 
-			const _this = this;
-
 			// Callback for possible async operation.
+			const _this = this;
 			function done() {
 				const viewObject = viewSource.instances[instanceKey];
 				_this.lastViewObject = viewObject;
@@ -95,7 +97,6 @@ class Navi {
 					callback();
 				}
 			}
-
 			// Create view object if missing. Otherwise done().
 			if (!viewSource.instances || !viewSource.instances[instanceKey]) {
 				this.createView(sourceKey, instanceKey, done);
@@ -116,6 +117,10 @@ class Navi {
 		// Requirments check.
 		if (!viewObject) {
 			throw 'Error: Navi closeView() method missing required arguments (viewObject).';
+		}
+
+		if (this.lastViewObject === viewObject) {
+			this.openView();
 		}
 
 		// Hide and cleanup NaviView object.
@@ -162,7 +167,7 @@ class Navi {
 				this.loadedScripts = {};
 			}
 			if (!this.loadedScripts[classUrl]) {
-				$.getScript(classUrl, function(script, textStatus, jqXHR) {
+				$.getScript(classUrl, function() { // script, textStatus, jqXHR) {
 					viewSource.classObject = window[className];
 					done();
 				});

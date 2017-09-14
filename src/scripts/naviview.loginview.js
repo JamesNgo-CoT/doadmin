@@ -1,8 +1,11 @@
+/* exported LoginView */
+/* global NaviView */
+
 class LoginView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
 
 		// Debug marker.
-		window.debug('⚑ LOGIN VIEW - CONSTRUCTOR', arguments);
+		// window.debug('⚑ LOGIN VIEW - CONSTRUCTOR', arguments);
 
 		super(sourceKey, instanceKey, navi, initOptions);
 
@@ -11,6 +14,7 @@ class LoginView extends NaviView {
 		this.searchAvailable = false;
 		this.search = null;
 		this.actionMenuItems = null;
+		this.inDynamicMenu = false;
 
 		this.render();
 	}
@@ -18,7 +22,7 @@ class LoginView extends NaviView {
 	render() {
 
 		// Debug marker.
-		window.debug('⚑ LOGIN VIEW - RENDER METHOD', arguments);
+		// window.debug('⚑ LOGIN VIEW - RENDER METHOD', arguments);
 
 		super.render();
 

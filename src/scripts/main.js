@@ -1,3 +1,5 @@
+/* global NaviBar */
+
 let cotApp;
 let cotLogin;
 let navi;
@@ -13,7 +15,7 @@ $(document).ready(function() {
 			appName: 'c3app',
 			ccRoot: 'https://insideto-secure.toronto.ca',
 			welcomeSelector: null,
-			onReady: function(cot_login_instance) {
+			onReady: function() { // (cot_login_instance) {
 				const viewSources = {
 					'loginView': {
 						classObject: null,
@@ -25,7 +27,9 @@ $(document).ready(function() {
 						classObject: null,
 						className: 'TEODashView',
 						classUrl: 'scripts/naviview.teodashview.js',
-						initOptions: null
+						initOptions:  {
+							formView: 'volunteerFormView'
+						}
 					},
 					'volunteersView': {
 						classObject: null,
@@ -48,7 +52,7 @@ $(document).ready(function() {
 						className: 'TEOEventsView',
 						classUrl: 'scripts/naviview.teoeventsview.js',
 						initOptions: {
-							formViewSourceKey: 'eventFormView'
+							formView: 'eventFormView'
 						}
 					},
 					'eventFormView': {
@@ -61,29 +65,37 @@ $(document).ready(function() {
 						classObject: null,
 						className: 'TEORegistrationsView',
 						classUrl: 'scripts/naviview.teoregistrationsview.js',
+						initOptions: {
+							formView: 'registrationFormView'
+						}
+					},
+					'registrationFormView': {
+						classObject: null,
+						className: 'TEORegistrationFormView',
+						classUrl: 'scripts/naviview.teoregistrationsview.js',
 						initOptions: null
 					},
 					'administrationView': {
 						classObject: null,
 						className: 'TEOAdministrationView',
-						classUrl: 'scripts/naviview.teoadministrationsview.js',
+						classUrl: 'scripts/naviview.teoadministrationview.js',
 						initOptions: null
 					}
 				};
 
-				// const defaultViewArguments = {
-				// 	sourceKey: 'dashboardView',
-				// 	showOptions: null,
-				// 	instanceKey: null,
-				// 	autoInstanceKey: false
-				// };
-				// TODO - Temporary Only. Restore above comments
 				const defaultViewArguments = {
-					sourceKey: 'volunteerFormView',
-					showOptions: { operation: 'new' },
-					instanceKey: 'add',
+					sourceKey: 'dashboardView',
+					showOptions: null,
+					instanceKey: null,
 					autoInstanceKey: false
 				};
+				// TODO - Temporary Only. Restore above comments
+				// const defaultViewArguments = {
+				// 	sourceKey: 'volunteerFormView',
+				// 	showOptions: { operation: 'new' },
+				// 	instanceKey: 'add',
+				// 	autoInstanceKey: false
+				// };
 
 				const menuItems = [{
 						label: 'Dashboard',
@@ -132,7 +144,7 @@ $(document).ready(function() {
 
 				navi = new NaviBar(viewSources, defaultViewArguments, menuItems, cotLogin, loginRequired, loginViewArguments);
 			},
-			onLogin: function(cot_login_instance) {
+			onLogin: function() { // (cot_login_instance) {
 				if (navi) {
 					navi.closeView(navi.lastViewObject);
 				}

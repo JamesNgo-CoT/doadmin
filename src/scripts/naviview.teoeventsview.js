@@ -1,37 +1,177 @@
+/* exported TEOEventsView */
+/* global NaviView Mustache DataTablesODataBridge */
+
 class TEOEventsView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
 		super(sourceKey, instanceKey, navi, initOptions);
 
-		this.title = 'Events';
-
-		window.debug('TEOEventsView', this);
-
-		this.search = {
-			action: function(searchText, searchTextbox) {
-				console.log(searchText);
-			}
-		};
-
 		const _this = this;
+
+		this.title = 'Events';
+		this.search = null;
 		this.actionMenuItems = [{
-			label: 'Add Event',
+			label: 'Reload Data',
 			action: function() {
-				console.log(_this.initOptions.formViewSourceKey);
-				const sourceKey = _this.initOptions.formViewSourceKey;
-				const showOptions = { isNew: true }
-				const instanceKey = 'add';
-				_this.navi.openView(sourceKey, showOptions, instanceKey, false);
+				_this.action_reload();
+			}
+		}, {
+			label: 'New Event',
+			action: function() {
+				_this.action_newEvent();
+			}
+		}, {
+			label: 'Copy',
+			action: function() {
+				$('.buttons-copy').trigger('click');
+			}
+		}, {
+			label: 'Export CSV',
+			action: function() {
+				$('.buttons-csv').trigger('click');
+			}
+		}, {
+			label: 'Export Excel',
+			action: function() {
+				$('.buttons-excel').trigger('click');
+			}
+		}, {
+			label: 'Export PDF',
+			action: function() {
+				$('.buttons-pdf').trigger('click');
+			}
+		}, {
+			label: 'Print',
+			action: function() {
+				$('.buttons-print').trigger('click');
 			}
 		}];
+		this.inDynamicMenu = false;
+
+		this.bridge = new DataTablesODataBridge();
 
 		this.render();
 	}
 
 	render() {
-
-		// Debug marker.
-		window.debug('⚑ LOGIN VIEW - RENDER METHOD', arguments);
-
 		super.render();
+
+		const _this = this;
+
+		// HTML.
+		const templ = `
+			<p>
+				<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
+				<button type="button" class="btn btn-default btn-add" style="margin: 0;">Add Event</button>
+			</p>
+
+			<table id="{{id}}" style="width: 100%;"></table>
+
+			<p>
+				<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
+				<button type="button" class="btn btn-default btn-add" style="margin: 0;">Add Event</button>
+			</p>
+		`;
+		const data = {
+			id: this.className + '_dataTable'
+		};
+		const html = Mustache.render(templ, data);
+		this.$topRegion.html(html);
+
+		// HTML Eventhandlers.
+		$('.btn-reload', this.$topRegion).on('click', function(e) {
+			e.preventDefault();
+			_this.action_reload();
+		});
+		$('.btn-add', this.$topRegion).on('click', function(e) {
+			e.preventDefault();
+			_this.action_newEvent();
+		});
+
+		this.dt = $('#' + data.id).DataTable({
+			dom: '<\'row\'<\'col-sm-6\'l><\'col-sm-6\'f>>' + '<\'row\'<\'col-sm-12\'tr>>' + '<\'row\'<\'col-sm-5\'i><\'col-sm-7\'p>>B',
+			buttons: [
+				'copy', 'csv', 'excel', 'pdf', 'print'
+			],
+			columns: [
+			// {
+			// 	data: 'id',
+			// 	checkboxes: {
+			// 		'selectRow': true
+			// 	},
+			// 	orderable: false
+			// },
+			{
+				data: 'eName',
+				title: 'Event Name',
+				default: ''
+			}, {
+				data: 'eTypeOf',
+				title: 'Event Type',
+				default: ''
+			}, {
+				data: 'eDate',
+				title: 'Event Date',
+				default: ''
+			}, {
+				data: 'id',
+				title: 'Action',
+				render: function() {
+					return '<button type="button" class="btn btn-default">View</button>'
+				}
+			}],
+			// order: [
+			// 	[2, "asc"]
+			// ],
+			// 'select': {
+			// 	'style': 'multi'
+			// },
+			"serverSide": true,
+			ajax: {
+				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=__Status ne \'DEL\'',
+				data: this.bridge.data(),
+				dataFilter: this.bridge.dataFilter()
+			}
+		});
+
+		$('#' + this.className + '_dataTable tbody').on('click', function(e) {
+			if ($(e.target).is('.btn')) {
+				e.preventDefault();
+				var data = _this.dt.row($(e.target).closest('tr')).data();
+				const sourceKey = _this.initOptions.formView;
+				const showOptions = {
+					operation: 'view',
+					id: data.id,
+					returnView: _this
+				};
+				const instanceKey = null;
+				const autoInstanceKey = true;
+				_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+			}
+		});
+	}
+
+	show(options) {
+		super.show(options);
+		console.log(options);
+		if (options && options.operation == 'reload') {
+			this.action_reload();
+		}
+	}
+
+	action_reload() {
+		if (this.dt) {
+			this.dt.ajax.reload(null, false);
+		}
+	}
+
+	action_newEvent() {
+		const sourceKey = this.initOptions.formView;
+		const showOptions = {
+			operation: 'new',
+			returnView: this
+		};
+		const instanceKey = 'add';
+		const autoInstanceKey = null;
+		this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
 	}
 }
