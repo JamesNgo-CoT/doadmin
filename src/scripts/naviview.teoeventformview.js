@@ -1,5 +1,5 @@
 /* exported TEOEventFormView */
-/* global NaviView CotForm2 moment DataTablesODataBridge */
+/* global NaviView CotForm2 moment DataTablesODataBridge Mustache */
 
 class TEOEventFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -174,8 +174,20 @@ class TEOEventFormView extends NaviView {
 					}]
 				}]
 			}, {
-				title: 'Event Registrations',
+				title: 'Attachments',
 				className: 'panel-info',
+
+				rows: [{
+					fields: [{
+						type: 'dropzone',
+						id: this.className + 'eAttachments',
+						options: {
+							maxFiles: 4,
+							url: 'https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/jngo2'
+						},
+						bindTo: 'eAttachments'
+					}]
+				}]
 			}]
 		};
 
@@ -319,10 +331,32 @@ class TEOEventFormView extends NaviView {
 						continue;
 					}
 					for (var i3 = 0, l3 = previewFormDef.sections[i1].rows[i2].fields.length; i3 < l3; i3++) {
-						const id = previewFormDef.sections[i1].rows[i2].fields[i3].id.replace(_this.className + '_', '');
-						previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+						// const id = previewFormDef.sections[i1].rows[i2].fields[i3].id.replace(_this.className + '_', '');
+						const id = previewFormDef.sections[i1].rows[i2].fields[i3].bindTo;
 						previewFormDef.sections[i1].rows[i2].fields[i3].bindTo = null;
-						previewFormDef.sections[i1].rows[i2].fields[i3].value = model.get(id) || '-'; //model.get(previewFormDef.sections[i1].rows[i2].fields[i3].id);
+						const value = model.get(id);
+						if (value == null || value == '' || (Array.isArray(value) && value.length == 0)) {
+							previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+							previewFormDef.sections[i1].rows[i2].fields[i3].value = '-';
+						} else {
+							if (id == 'eAttachments') {
+								const template = `
+								<ul>
+									{{#values}}
+									<li>
+										{{name}} (<a href="https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+									</li>
+									{{/values}}
+								</ul>
+								`;
+								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'html';
+								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, { values: value });
+							} else {
+								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+								previewFormDef.sections[i1].rows[i2].fields[i3].value = value;
+							}
+						}
+
 					}
 				}
 			}
@@ -336,13 +370,13 @@ class TEOEventFormView extends NaviView {
 
 				<div id="volunteerSection" class="panel panel-info">
 					<div class="panel-heading">
-						<h3>Volunteer Registration</h3>
+						<h3>Registration</h3>
 					</div>
 					<div class="panel-body">
 						<div class="row">
 							<div class="col-xs-12">
 								<table id="` + _this.className + `_dt" style="width: 100%;"></table>
-								<p><button type="button" class="btn btn-default btn-register">Register</button></p>
+								<p><button type="button" class="btn btn-default btn-register" style="margin: 0;">Register</button> <button type="button" class="btn btn-default btn-export-excel" style="margin: 0;">Export Excel</button></p>
 							</div>
 						</div>
 					</div>
@@ -355,6 +389,10 @@ class TEOEventFormView extends NaviView {
 					operation: 'reload'
 				});
 				_this.navi.closeView(_this);
+			});
+			$('.btn-export-excel', _this.$topRegion).on('click', function(e) {
+				e.preventDefault();
+				$('.buttons-excel', _this.$topRegion).trigger('click');
 			});
 			$('.btn-save', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
@@ -385,35 +423,42 @@ class TEOEventFormView extends NaviView {
 				// 	},
 				// 	orderable: false
 				// },
+				// {
+				// 	data: 'rEName',
+				// 	title: 'Event Name',
+				// 	default: ''
+				// }, {
+				// 	data: 'rETypeOf',
+				// 	title: 'Event Type',
+				// 	default: ''
+				// }, {
+				// 	data: 'rEDate',
+				// 	title: 'Event Date',
+				// 	default: ''
+				// }, {
 				{
-					data: 'rEName',
-					title: 'Event Name',
-					default: ''
-				}, {
-					data: 'rETypeOf',
-					title: 'Event Type',
-					default: ''
-				}, {
-					data: 'rEDate',
-					title: 'Event Date',
-					default: ''
-				}, {
-					data: 'vLName',
-					title: 'Volunteer',
-					default: '',
-					render: function(data, type, row) {
-						return row.vLName + ', ' + row.vFName;
-					}
-				}, {
+				// 	data: 'vLName',
+				// 	title: 'Volunteer',
+				// 	default: '',
+				// 	render: function(data, type, row) {
+				// 		return row.vLName + ', ' + row.vFName;
+				// 	}
+				// }, {
 					data: 'vLName',
 					title: 'Last Name',
-					default: '',
-					visible: false
+					default: ''
 				}, {
 					data: 'vFName',
 					title: 'First Name',
-					default: '',
-					visible: false
+					default: ''
+				}, {
+					data: 'vEmail',
+					title: 'Email',
+					default: ''
+				}, {
+					data: 'vPhoneCell',
+					title: 'Mobile Phone',
+					default: ''
 				}, {
 					data: 'id',
 					title: 'Action',
@@ -429,9 +474,12 @@ class TEOEventFormView extends NaviView {
 				// },
 				"serverSide": true,
 				ajax: {
-					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and rEId eq \'' + model.get('id') + '\'',
+					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and eKey eq \'' + model.get('eKey') + '\'',
 					data: bridge.data(),
-					dataFilter: bridge.dataFilter()
+					dataFilter: bridge.dataFilter(),
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					}
 				}
 			});
 			$('#' + _this.className + '_dt tbody').on('click', function(e) {
@@ -512,6 +560,49 @@ class TEOEventFormView extends NaviView {
 		$(':input').prop('disabled', true);
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + this.id + '\')';
+
+		let data = model.toJSON();
+		if (data.eAttachments) {
+			data.eAttachments = data.eAttachments.map((file) => {
+				var bin_id;
+				if (file.bin_id) {
+					bin_id = file.bin_id;
+				} else {
+					try {
+						bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+					} catch (e) {
+						bin_id = null;
+					}
+				}
+				return {
+					bin_id: bin_id,
+					name: file.name,
+					size: file.size,
+					status: file.status,
+					type: file.type
+				}
+			});
+		}
+
+		data = {
+			eContEmail: data.eContEmail,
+			eContName: data.eContName,
+			eContPhone: data.eContPhone,
+			eDate:  moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+			eHours: data.eHours,
+			eKey: data.eKey || this.id,
+			eLocation: data.eLocation,
+			eName: data.eName,
+			eNotes: data.eNotes,
+			eSpeakerInfo: data.eSpeakerInfo,
+			eSpeakerName: data.eSpeakerName,
+			eState: data.eState,
+			eTimeEnd: data.eTimeEnd,
+			eTimeStart: data.eTimeStart,
+			eTypeOf: data.eTypeOf,
+			eAttachments: data.eAttachments
+		}
+
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -520,7 +611,7 @@ class TEOEventFormView extends NaviView {
 				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(model.toJSON()),
+			data: JSON.stringify(data),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
 				alert('An error has occured. ', errorThrown);
@@ -536,8 +627,49 @@ class TEOEventFormView extends NaviView {
 		$(':input').prop('disabled', true);
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event';
-		const data = model.toJSON();
-		data.eDate = moment(data.eDate).utc().format()
+
+		let data = model.toJSON();
+		if (data.eAttachments) {
+			data.eAttachments = data.eAttachments.map((file) => {
+				var bin_id;
+				if (file.bin_id) {
+					bin_id = file.bin_id;
+				} else {
+					try {
+						bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+					} catch (e) {
+						bin_id = null;
+					}
+				}
+				return {
+					bin_id: bin_id,
+					name: file.name,
+					size: file.size,
+					status: file.status,
+					type: file.type
+				}
+			});
+		}
+
+		data = {
+			eContEmail: data.eContEmail,
+			eContName: data.eContName,
+			eContPhone: data.eContPhone,
+			eDate:  moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+			eHours: data.eHours,
+			eKey: data.eKey,
+			eLocation: data.eLocation,
+			eName: data.eName,
+			eNotes: data.eNotes,
+			eSpeakerInfo: data.eSpeakerInfo,
+			eSpeakerName: data.eSpeakerName,
+			eState: data.eState,
+			eTimeEnd: data.eTimeEnd,
+			eTimeStart: data.eTimeStart,
+			eTypeOf: data.eTypeOf,
+			eAttachments: data.eAttachments
+		}
+
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -578,6 +710,7 @@ class TEOEventFormView extends NaviView {
 			},
 			method: 'GET',
 			success: function success(data) { // , textStatus, jqXHR) {
+				data.eDate = moment(data.eDate).isValid() ? moment(data.eDate).format('MM/DD/YYYY') : '';
 				callback(data);
 			}
 		});

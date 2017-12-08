@@ -41,7 +41,6 @@
       "browser": true,
       "jquery": true
     },
-    "fix":true,
     "globals": {
       "cot_app": true,
       "cot_form": true,
@@ -67,7 +66,7 @@
     "includeEditableSelect": true,
     "includePlaceholders": true,
     "includeMultiSelect": true,
-    "includeOMS": true,
+    "includeOMS": false,
     "includeFullCalendar": true,
     "includeDatePicker": true,
     "includeLogin": true,
@@ -75,7 +74,7 @@
     "includeMoment": true,
     "includeModeling": true,
     "includeWebtrends": true,
-    "includeBootbox" : true,
+    "includeBootbox" : false,
     "includeDropzone": true
   }
 }

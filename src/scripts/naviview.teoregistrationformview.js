@@ -16,8 +16,6 @@ class TEORegistrationFormView extends NaviView {
 	render() {
 		super.render();
 
-		const _this = this;
-
 		const template = `
 			<p>
 				<span class="btns-new">
@@ -109,46 +107,46 @@ class TEORegistrationFormView extends NaviView {
 
 		$('.btns-new, .btns-update, .btns-preview, #eventSection .row.datatable, #eventSection .row.display .row, #eventSection .row.buttons, #eventSection .row.buttons .btn-cancel, #eventSection .row.buttons .btn-change, #volunteerSection .row.datatable, #volunteerSection .row.display .row, #volunteerSection .row.buttons, #volunteerSection .row.buttons .btn-cancel, #volunteerSection .row.buttons .btn-change', this.$topRegion).hide();
 
-		$('.btns-new .btn-cancel', this.$topRegion).on('click', function(e) {
+		$('.btns-new .btn-cancel', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
-			_this.navi.openView(_this.showOpts.returnView, {
+			this.navi.openView(this.showOpts.returnView, {
 				reload: true
 			});
-			_this.navi.closeView(_this);
+			this.navi.closeView(this);
 		});
 
-		$('.btns-new .btn-create', this.$topRegion).on('click', function(e) {
+		$('.btns-new .btn-create', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
-			_this.action_create();
+			this.action_create();
 		});
 
-		$('.btns-update .btn-done', this.$topRegion).on('click', function(e) {
+		$('.btns-update .btn-done', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
 			// _this.show({ returnView: this.showOpts.returnView, data: this.data, preview: true });
-			_this.navi.openView(_this.showOpts.returnView, {
+			this.navi.openView(this.showOpts.returnView, {
 				reload: true
 			});
-			_this.navi.closeView(_this);
+			this.navi.closeView(this);
 		});
 
-		$('.btns-update .btn-save', this.$topRegion).on('click', function(e) {
+		$('.btns-update .btn-save', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
-			_this.action_update();
+			this.action_update();
 		});
 
-		$('.btns-update .btn-delete', this.$topRegion).on('click', function(e) {
+		$('.btns-update .btn-delete', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
-			_this.action_delete();
+			this.action_delete();
 		});
 
-		$('#eventSection .row.buttons .btn-change', this.$topRegion).on('click', function(e) {
+		$('#eventSection .row.buttons .btn-change', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
-			_this.action_changeEvent();
+			this.action_changeEvent();
 		});
 
-		$('#volunteerSection .row.buttons .btn-change', this.$topRegion).on('click', function(e) {
+		$('#volunteerSection .row.buttons .btn-change', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
-			_this.action_changeVolunteer();
+			this.action_changeVolunteer();
 		});
 
 		const eBridge = new DataTablesODataBridge();
@@ -156,7 +154,10 @@ class TEORegistrationFormView extends NaviView {
 			columns: [{
 				data: 'eDate',
 				title: 'Event Date',
-				default: ''
+				default: '',
+				render: function(data) {
+					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
+				}
 			}, {
 				data: 'eName',
 				title: 'Event Name',
@@ -168,23 +169,27 @@ class TEORegistrationFormView extends NaviView {
 			}, {
 				data: 'id',
 				title: 'Action',
-				render: function() {
+				render: () => {
 					return '<button type="button" class="btn btn-default">Select</button>'
 				}
 			}],
 			lengthMenu: [5, 10, 20],
 			"serverSide": true,
+			scrollX: true,
 			ajax: {
-				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=__Status ne \'DEL\'',
+				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=__Status ne \'DEL\' and eState eq \'Approved\'',
 				data: eBridge.data(),
-				dataFilter: eBridge.dataFilter()
+				dataFilter: eBridge.dataFilter(),
+				headers: {
+					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+				}
 			}
 		});
-		$('#' + this.className + '_edt tbody').on('click', function(e) {
+		$('#' + this.className + '_edt tbody').on('click', (e) => {
 			if ($(e.target).is('.btn')) {
 				e.preventDefault();
-				const eventData = _this.edt.row($(e.target).closest('tr')).data();
-				_this.action_setEvent(eventData);
+				const eventData = this.edt.row($(e.target).closest('tr')).data();
+				this.action_setEvent(eventData);
 			}
 		});
 
@@ -205,7 +210,10 @@ class TEORegistrationFormView extends NaviView {
 			}, {
 				data: 'vDateApproved',
 				title: 'Date Approved',
-				default: ''
+				default: '',
+				render: function(data) {
+					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
+				}
 			}, {
 				data: 'vStatus',
 				title: 'Status',
@@ -221,23 +229,27 @@ class TEORegistrationFormView extends NaviView {
 			}, {
 				data: 'id',
 				title: 'Action',
-				render: function() {
+				render: () => {
 					return '<button type="button" class="btn btn-default">Select</button>'
 				}
 			}],
 			serverSide: true,
+			scrollX: true,
 			lengthMenu: [5, 10, 20],
 			ajax: {
 				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer?$format=application/json&$filter=__Status ne \'DEL\' and (vAppStatus eq \'Approved\' and vStatus eq \'Active\')',
 				data: vBridge.data(),
-				dataFilter: vBridge.dataFilter()
+				dataFilter: vBridge.dataFilter(),
+				headers: {
+					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+				}
 			}
 		});
-		$('#' + this.className + '_vdt tbody').on('click', function(e) {
+		$('#' + this.className + '_vdt tbody').on('click', (e) => {
 			if ($(e.target).is('.btn')) {
 				e.preventDefault();
-				var volunteerData = _this.vdt.row($(e.target).closest('tr')).data();
-				_this.action_setVolunteer(volunteerData);
+				var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
+				this.action_setVolunteer(volunteerData);
 			}
 		});
 	}
@@ -257,12 +269,13 @@ class TEORegistrationFormView extends NaviView {
 			$('.btns-new, .btns-update, .btns-preview, #eventSection .row.datatable, #eventSection .row.buttons, #eventSection .row.buttons .btn-cancel, #eventSection .row.buttons .btn-change, #volunteerSection .row.buttons, #volunteerSection .row.datatable, #volunteerSection .row.buttons .btn-cancel, #volunteerSection .row.buttons .btn-change').hide();
 			$('.btns-update').show();
 
-			const eventId = _this.data.rEId;
+			// const eventId = _this.data.rEId;
+			const eventId = _this.data.eKey;
 			_this.action_getEventData(eventId, function(eventData) {
 				_this.action_setEvent(eventData);
 			});
 
-			const volunteerId = _this.data.mainId;
+			const volunteerId = _this.data.MainID;
 			_this.action_getVolunteerData(volunteerId, function(volunteerData) {
 				_this.action_setVolunteer(volunteerData);
 			})
@@ -312,7 +325,8 @@ class TEORegistrationFormView extends NaviView {
 
 	action_setEvent(eventData) {
 		this.eventData = {
-			rEId: eventData.id
+			// rEId: eventData.id
+			eKey: eventData.eKey
 		};
 
 		for (let k in eventData) {
@@ -376,7 +390,7 @@ class TEORegistrationFormView extends NaviView {
 
 	action_setVolunteer(volunteerData) {
 		this.volunteerData = {
-			mainId: volunteerData.id
+			MainID: volunteerData.MainID
 		};
 
 		for (let k in volunteerData) {
@@ -427,15 +441,33 @@ class TEORegistrationFormView extends NaviView {
 
 	action_create() {
 		if (this.eventData && this.volunteerData) {
-			this.data = {};
+			this.data = {
+				MainID: this.volunteerData.MainID,
+				eDate: this.eventData.rEDate,
+				eKey: this.eventData.eKey,
+				rEHours: this.eventData.rEHours,
+				rELocation: this.eventData.rELocation,
+				rEName: this.eventData.rEName,
+				rEType: this.eventData.rETypeOf,
+				vEmail: this.volunteerData.vEmail,
+				vEmergName: this.volunteerData.vEmergName,
+				vEmergPhone: this.volunteerData.vEmergPhone,
+				vEmergPhoneAlt: this.volunteerData.vEmergPhoneAlt,
+				vEmergRel: this.volunteerData.vEmergRel,
+				vFName: this.volunteerData.vFName,
+				vLName: this.volunteerData.vLName,
+				vPhoneCell: this.volunteerData.vPhoneCell,
+				vPhoneDay: this.volunteerData.vPhoneDay,
+				vPhoneEve: this.volunteerData.vPhoneEve
+			};
 
-			for (let k in this.eventData) {
-				this.data[k] = this.eventData[k];
-			}
-
-			for (let k in this.volunteerData) {
-				this.data[k] = this.volunteerData[k];
-			}
+			// for (let k in this.eventData) {
+			// 	this.data[k] = this.eventData[k];
+			// }
+			//
+			// for (let k in this.volunteerData) {
+			// 	this.data[k] = this.volunteerData[k];
+			// }
 
 			$(':input').prop('disabled', true);
 			const _this = this;
@@ -472,15 +504,33 @@ class TEORegistrationFormView extends NaviView {
 		if (this.eventData && this.volunteerData) {
 			const id = this.data.id;
 
-			this.data = {};
+			this.data = {
+				MainID: this.volunteerData.MainID,
+				eDate: this.eventData.rEDate,
+				eKey: this.eventData.eKey,
+				rEHours: this.eventData.rEHours,
+				rELocation: this.eventData.rELocation,
+				rEName: this.eventData.rEName,
+				rEType: this.eventData.rETypeOf,
+				vEmail: this.volunteerData.vEmail,
+				vEmergName: this.volunteerData.vEmergName,
+				vEmergPhone: this.volunteerData.vEmergPhone,
+				vEmergPhoneAlt: this.volunteerData.vEmergPhoneAlt,
+				vEmergRel: this.volunteerData.vEmergRel,
+				vFName: this.volunteerData.vFName,
+				vLName: this.volunteerData.vLName,
+				vPhoneCell: this.volunteerData.vPhoneCell,
+				vPhoneDay: this.volunteerData.vPhoneDay,
+				vPhoneEve: this.volunteerData.vPhoneEve
+			};
 
-			for (let k in this.eventData) {
-				this.data[k] = this.eventData[k];
-			}
-
-			for (let k in this.volunteerData) {
-				this.data[k] = this.volunteerData[k];
-			}
+			// for (let k in this.eventData) {
+			// 	this.data[k] = this.eventData[k];
+			// }
+			//
+			// for (let k in this.volunteerData) {
+			// 	this.data[k] = this.volunteerData[k];
+			// }
 
 			$(':input').prop('disabled', true);
 			const _this = this;
@@ -507,7 +557,7 @@ class TEORegistrationFormView extends NaviView {
 				}
 			});
 		} else {
-			alert('Missing information.');
+			alert('Incomplete information.');
 		}
 	}
 
@@ -562,7 +612,8 @@ class TEORegistrationFormView extends NaviView {
 
 	action_getEventData(id, cbk) {
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + id + '\')';
+		// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + id + '\')';
+		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=eKey eq \'' + id + '\'';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -575,7 +626,7 @@ class TEORegistrationFormView extends NaviView {
 			method: 'GET',
 			success: function success(data) { // (data, textStatus, jqXHR) {
 				if (cbk) {
-					cbk(data);
+					cbk(data.value[0]);
 				}
 			}
 		});
@@ -583,7 +634,8 @@ class TEORegistrationFormView extends NaviView {
 
 	action_getVolunteerData(id, cbk) {
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + id + '\')';
+		// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + id + '\')';
+		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer?$format=application/json&$filter=MainID eq \'' + id + '\'';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -596,15 +648,11 @@ class TEORegistrationFormView extends NaviView {
 			method: 'GET',
 			success: function success(data) { // (data, textStatus, jqXHR) {
 				if (cbk) {
-					cbk(data);
+					cbk(data.value[0]);
 				}
 			}
 		});
 	}
-
-
-
-
 
 	// action_submit(model) {
 	// 	if (this.id) {

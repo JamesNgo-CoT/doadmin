@@ -1,4 +1,4 @@
-/* global NaviBar */
+/* global NaviBar CotLoginExt */
 
 let cotApp;
 let cotLogin;
@@ -9,9 +9,10 @@ $(document).ready(function() {
 	cotApp = new cot_app('doadmin');
 	cotApp.render(function() {
 
-		cotApp.setTitle('TEO Volunteer Admin');
+		cotApp.setTitle('Live Green Volunteer Admin');
 
-		cotLogin = new cot_login({
+		// cotLogin = new cot_login({
+		cotLogin = new CotLoginExt({
 			appName: 'c3app',
 			ccRoot: 'https://insideto-secure.toronto.ca',
 			welcomeSelector: null,

@@ -1,5 +1,5 @@
 /* exported TEOEventsView */
-/* global NaviView Mustache DataTablesODataBridge */
+/* global NaviView Mustache moment DataTablesODataBridge */
 
 class TEOEventsView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -111,7 +111,10 @@ class TEOEventsView extends NaviView {
 			}, {
 				data: 'eDate',
 				title: 'Event Date',
-				default: ''
+				default: '',
+				render: function(data) {
+					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
+				}
 			}, {
 				data: 'id',
 				title: 'Action',
@@ -129,7 +132,10 @@ class TEOEventsView extends NaviView {
 			ajax: {
 				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=__Status ne \'DEL\'',
 				data: this.bridge.data(),
-				dataFilter: this.bridge.dataFilter()
+				dataFilter: this.bridge.dataFilter(),
+				headers: {
+					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+				}
 			}
 		});
 

@@ -1,5 +1,180 @@
-/* exported CotForm2 DataTablesODataBridge */
-/* global CotForm */
+/* exported CotForm2 CotLoginExt DataTablesODataBridge */
+/* global CotForm CotDropzone CotSession */
+cot_form.prototype.dropzoneFieldRender = function(originalfield) {
+	// console.log('DROPZONE FIELD RENDER', field);
+	var field = $.extend(true, {}, originalfield);
+  // Main element.
+  var $el = $('<div></div>');
+
+  // Hidden input element.
+  // For form.getData() and 'required' validation.
+  var $hiddenInput = $('<input type="hidden">')
+    .attr('data-fv-field', field.id)
+    .attr('id', field.id)
+    .attr('name', field.id);
+  if (field.required) {
+    $hiddenInput
+      .attr('aria-required', 'true')
+      .attr('class', 'required');
+  }
+  $el.append($hiddenInput);
+
+  // Dropzone div element.
+  var $dropzoneDiv = $('<div class="dropzone"></div>');
+  $el.append($dropzoneDiv);
+
+  // Dropzone.
+  var cotDropzone = $hiddenInput.get(0).cotDropzone = new CotDropzone();
+  // console.log('NEW COT DROPZONE', cotDropzone);
+  // Fill from model.
+  cotDropzone._fillFromModel = function(model) {
+    if (field.bindTo) {
+
+      // Get files as array.
+      var files = model.get(field.bindTo) || [];
+      if (typeof files === 'string') {
+        try {
+          files = JSON.parse(files);
+          if (!Array.isArray(files)) {
+            files = [];
+          }
+        } catch (e) {
+          files = [];
+        }
+      }
+      if (!Array.isArray(files)) {
+        files = [files];
+      }
+
+      // Set initial files.
+      cotDropzone.initFiles = files.map(function(file) {
+        file.status = 'initial';
+        return file;
+      });
+
+      // Reset dropzone files.
+      cotDropzone.dropzone.removeAllFiles(true);
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        cotDropzone.dropzone.emit('addedfile', file);
+        cotDropzone.dropzone.emit('complete', file);
+        cotDropzone.dropzone.files.push(file);
+      }
+
+      // Update hidden input.
+      cotDropzone._updateHiddenIntput();
+    }
+  };
+
+  // Update hidden input.
+  if (!field.options.valueMap) {
+    field.options.valueMap = function(file) {
+      var bin_id;
+      try {
+        bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+      } catch (e) {
+        bin_id = null;
+      }
+      return {
+        bin_id: bin_id,
+        name: file.name,
+        size: file.size,
+        status: file.status,
+        type: file.type
+      }
+    }
+  }
+  cotDropzone._updateHiddenIntput = function() {
+    var value = cotDropzone.dropzone.files.filter(function(file) {
+      return file.status == 'initial' || file.status == 'success'
+    }).map(field.options.valueMap);
+    var textValue = value.length > 0 ? JSON.stringify(value) : '';
+    if (textValue != $hiddenInput.val()) {
+      $hiddenInput.val(textValue).trigger('change');
+      $hiddenInput.closest('form').data('formValidation').revalidateField($hiddenInput);
+    }
+  };
+  cotDropzone._watchChanges = function(form) {
+    if (field.bindTo) {
+      $hiddenInput.on('change', function() { // e) {
+        if (form._model) {
+          var newValue = cotDropzone.dropzone.files.filter(function(file) {
+            return file.status == 'initial' || file.status == 'success'
+          })
+          form._model.set(field['bindTo'], newValue);
+        }
+      });
+    }
+  };
+  cotDropzone.finalize = function(cbk) {
+    var step2 = function() {
+      if (!cotDropzone.initFiles) {
+        cotDropzone.initFiles = [];
+      }
+      var deletable = cotDropzone.initFiles.filter(function(file) {
+        return cotDropzone.dropzone.files.indexOf(file) == -1;
+      })
+      var keepable = cotDropzone.dropzone.files.filter(function(file) {
+        return cotDropzone.initFiles.indexOf(file) == -1;
+      });
+      if (cbk) {
+        cbk({
+          delete: deletable.filter(function(file) {
+            return file.status == 'initial' || file.status == 'success';
+          }),
+          keep: keepable.filter(function(file) {
+            return file.status == 'initial' || file.status == 'success';
+          })
+        });
+      }
+    };
+    var step1 = function() {
+      if (cotDropzone.dropzone.getQueuedFiles().length > 0) {
+        var success = function() {
+          cotDropzone.dropzone.off('success', success);
+          step1();
+        };
+        cotDropzone.dropzone.on('success', success);
+        cotDropzone.dropzone.processQueue();
+      } else {
+        step2();
+      }
+    };
+    step1();
+  };
+
+  // Dropzone options.
+  field.options.selector = $dropzoneDiv;
+  if (field.options.includeCotFormInit != false) {
+    field.options.init = (function(oldInit) {
+      return function() {
+				// console.log('DROP ZONE INIT', this);
+				// console.log('OLD INIT', oldInit);
+        if (oldInit) {
+          oldInit.apply(this, arguments);
+        }
+				// console.log('THIS', this);
+        this.on('success', function() { //file) {
+          cotDropzone._updateHiddenIntput();
+        });
+        this.on('removedfile', function() { //file) {
+          cotDropzone._updateHiddenIntput();
+        });
+      }
+    })(field.options.init);
+  }
+  if (!field.options.clickable && field.options.includeCotFormButton != false) {
+    $el.append('<p><button type="button" class="btn btn-default" id="' + field.id + 'Btn">Upload File</button></p>');
+    field.options.clickable = [$dropzoneDiv.get(0), $el.find('#' + field.id + 'Btn').get(0)];
+  }
+
+  // Render dropzone.
+  cotDropzone.render(field.options);
+	console.log('DROP ZONE RENDER', field.options);
+
+  // Return wrapper element.
+  return $el.get(0);
+};
 
 function CotForm2(definition) {
 	if (!definition) {
@@ -16,7 +191,7 @@ function CotForm2(definition) {
 		success: definition['success'] || function() {}
 	});
 	var that = this;
-	var bindableTypes = ['daterangepicker', 'datetimepicker','text', 'dropdown', 'textarea', 'checkbox', 'radio', 'password', 'multiselect'];
+	var bindableTypes = ['daterangepicker', 'datetimepicker','text', 'dropdown', 'textarea', 'checkbox', 'radio', 'password', 'multiselect', 'dropzone'];
 	$.each(definition['sections'] || [], function(i, sectionInfo) {
 		var section = that.cotForm.addSection({
 			id: sectionInfo['id'] || 'section' + i,
@@ -40,6 +215,60 @@ function CotForm2(definition) {
 }
 CotForm2.prototype = Object.create(CotForm.prototype);
 CotForm2.prototype.constructor = CotForm2;
+CotForm2.prototype._fillFromModel = function(model) {
+	console.log('FILLFROMMODEL', model);
+	if (this._isRendered) {
+		console.log('_ISRENDERED', this._isRendered);
+		(this._definition['sections'] || []).forEach(function(sectionInfo) {
+			(sectionInfo['rows'] || []).forEach(function(row) {
+				(row['fields'] || []).forEach(function(field) {
+					console.log('BINDTO', field['bindTo']);
+					//TODO: support grids
+					if (field['bindTo']) {
+						var value = model ? (model.get(field['bindTo']) || '') : '';
+						console.log('VALUE', value);
+						switch (field['type']) {
+							case 'radio':
+							case 'checkbox':
+								$.makeArray(value).forEach(function(val) {
+									var fld = $('input[name="' + field['id'] + '"][value="' + val + '"]');
+									if (fld.length) {
+										fld[0].checked = true;
+									}
+								});
+								break;
+							case 'multiselect':
+								$('#' + field['id']).multiselect('select', $.makeArray(value));
+								break;
+							case 'datetimepicker':
+							console.log('TEST WITH VAL');
+								// $(".datetimepicker." + field['id']).val(value).trigger('change');
+								$(".datetimepicker." + field['id']).data("DateTimePicker").date(value);
+								break;
+							case 'daterangepicker':
+								var picker = $('#' + field['id']).data('daterangepicker');
+								if (value.indexOf(picker.locale.separator) > -1) {
+									var dates = value.split(picker.locale.separator);
+									picker.setStartDate(dates[0]);
+									picker.setEndDate(dates[1]);
+								}
+								break;
+							case 'dropzone':
+								var dz = $('#' + field['id']).get(0);
+								if (dz && dz.cotDropzone) {
+									dz.cotDropzone._fillFromModel(model);
+								}
+								break;
+							default:
+								$('#' + field['id']).val(value);
+								break;
+						}
+					}
+				});
+			});
+		});
+	}
+};
 CotForm2.prototype._watchChanges = function() {
 	var form = this;
 	if (this._isRendered) {
@@ -48,13 +277,13 @@ CotForm2.prototype._watchChanges = function() {
 				(row['fields'] || []).forEach(function(field) {
 					//TODO: support grids
 					if (field['bindTo']) {
-						if (field['type'] == 'radio') {
+						if (field['type'] === 'radio') {
 							$('input[name="' + field['id'] + '"]').on('click', function(e) {
 								if (form._model) {
 									form._model.set(field['bindTo'], $(e.currentTarget).val());
 								}
 							});
-						} else if (field['type'] == 'checkbox') {
+						} else if (field['type'] === 'checkbox') {
 							$('input[name="' + field['id'] + '"]').on('click', function(e) {
 								if (form._model) {
 									var value = $(e.currentTarget).val();
@@ -68,22 +297,17 @@ CotForm2.prototype._watchChanges = function() {
 									form._model.set(field['bindTo'], values);
 								}
 							});
-						} else if (field['type'] == 'datetimepicker') {
-							/*
-							modify this section to match the chosen corejs CotForm date picker.
-							current date picker: https://github.com/Eonasdan/bootstrap-datetimepicker/issues
-							 */
-							$("#" + field['id']).parent().on('dp.change', function() { // (e) {
+						} else if (field['type'] === 'datetimepicker') {
+							$(".datetimepicker." + field['id']).on('dp.change', function() {
 								if (form._model) {
 									form._model.set(field['bindTo'], $("#" + field['id']).val());
 								}
 							});
-						} else if (field['type'] == 'daterangepicker') {
-							$("#" + field['id']).on('apply.daterangepicker', function() {
-								if (form._model) {
-									form._model.set(field['bindTo'], $(this).val());
-								}
-							});
+						} else if (field['type'] == 'dropzone') {
+							var dz = $('#' + field['id']).get(0);
+							if (dz && dz.cotDropzone) {
+								dz.cotDropzone._watchChanges(form);
+							}
 						} else {
 							$('#' + field['id']).on('change', function(e) {
 								if (form._model) {
@@ -102,7 +326,53 @@ CotForm2.prototype._watchChanges = function() {
 	}
 };
 
+class CotLoginExt extends cot_login {
+	constructor(options) {
+		const _onReady = options.onReady;
+		options.onReady = function(cot_login_instance) {
+			cot_login_instance.modal.on('shown.bs.modal', function () {
+				$('#username').focus()
+			});
+			if (_onReady) {
+				_onReady(cot_login_instance);
+			}
+		}
 
+		super(options);
+
+		this.isRelogin = false;
+	}
+
+	isLoggedIn(callback, withRelogin) {
+		const _this = this;
+		const isLoggedInHandler = !withRelogin ? callback : function(result) {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				_this.isRelogin = true;
+				_this.showLogin(function() {
+					_this.isRelogin = false;
+					_this.session.isLoggedIn(callback);
+				});
+			} else {
+				callback(result);
+			}
+		}
+
+		return this.session.isLoggedIn(isLoggedInHandler);
+	}
+
+	showLogin(callback) {
+		if (callback) {
+			this.modal
+				.off('hidden.bs.modal')
+				.on('hidden.bs.modal', function () { // e) {
+					$(this).off('hidden.bs.modal');
+					callback();
+				});
+		}
+
+		super.showLogin();
+	}
+}
 
 class DataTablesODataBridge {
 	constructor() {}

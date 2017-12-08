@@ -1,5 +1,5 @@
 /* exported TEOVolunteerFormView */
-/* global NaviView CotForm2 moment DataTablesODataBridge */
+/* global NaviView CotForm2 moment DataTablesODataBridge Mustache */
 
 class TEOVolunteerFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -319,6 +319,7 @@ class TEOVolunteerFormView extends NaviView {
 						id: this.className + '_vDateSubmitted',
 						title: 'Date Submitted',
 						type: 'datetimepicker',
+						options: { format: 'MM/DD/YYYY', extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z'] },
 						bindTo: 'vDateSubmitted'
 						//}]
 					}, {
@@ -442,7 +443,7 @@ class TEOVolunteerFormView extends NaviView {
 							}
 						],
 						orientation: 'horizontal',
-						bindTo: 'vFormss'
+						bindTo: 'vForms'
 					}]
 				}, {
 					fields: [{
@@ -451,6 +452,21 @@ class TEOVolunteerFormView extends NaviView {
 						type: 'textarea',
 						rows: 5,
 						bindTo: 'vNotes'
+					}]
+				}]
+			}, {
+				title: 'Attachments',
+				className: 'panel-info',
+
+				rows: [{
+					fields: [{
+						type: 'dropzone',
+						id: this.className + 'vAttachments',
+						options: {
+							maxFiles: 4,
+							url: 'https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/jngo2'
+						},
+						bindTo: 'vAttachments'
 					}]
 				}]
 			}]
@@ -495,10 +511,10 @@ class TEOVolunteerFormView extends NaviView {
 
 		let model = new CotModel({
 
-				vDateSubmitted: moment().format('M/D/YYYY h:m A'),
-				vGraduate: 'No',
-				vAppStatus: 'New',
-				vAODA: 'No'
+			vDateSubmitted: moment().format('M/D/YYYY h:m A'),
+			vGraduate: 'No',
+			vAppStatus: 'New',
+			vAODA: 'No'
 
 		});
 		this.formDef.success = function(e) {
@@ -603,10 +619,36 @@ class TEOVolunteerFormView extends NaviView {
 						continue;
 					}
 					for (var i3 = 0, l3 = previewFormDef.sections[i1].rows[i2].fields.length; i3 < l3; i3++) {
-						const id = previewFormDef.sections[i1].rows[i2].fields[i3].id.replace(_this.className + '_', '');
-						previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+						// const id = previewFormDef.sections[i1].rows[i2].fields[i3].id.replace(_this.className + '_', '');
+						// previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+						// previewFormDef.sections[i1].rows[i2].fields[i3].bindTo = null;
+						// previewFormDef.sections[i1].rows[i2].fields[i3].value = model.get(id) || '-'; //model.get(previewFormDef.sections[i1].rows[i2].fields[i3].id);
+
+						const id = previewFormDef.sections[i1].rows[i2].fields[i3].bindTo;
 						previewFormDef.sections[i1].rows[i2].fields[i3].bindTo = null;
-						previewFormDef.sections[i1].rows[i2].fields[i3].value = model.get(id) || '-'; //model.get(previewFormDef.sections[i1].rows[i2].fields[i3].id);
+						const value = model.get(id);
+						if (value == null || value == '' || (Array.isArray(value) && value.length == 0)) {
+							previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+							previewFormDef.sections[i1].rows[i2].fields[i3].value = '-';
+						} else {
+							if (id == 'eAttachments') {
+								const template = `
+								<ul>
+									{{#values}}
+									<li>
+										{{name}} (<a href="https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+									</li>
+									{{/values}}
+								</ul>
+								`;
+								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'html';
+								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, { values: value });
+							} else {
+								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
+								previewFormDef.sections[i1].rows[i2].fields[i3].value = value;
+							}
+						}
+
 					}
 				}
 			}
@@ -630,7 +672,7 @@ class TEOVolunteerFormView extends NaviView {
 
 				<div id="volunteerSection" class="panel panel-info">
 					<div class="panel-heading">
-						<h3>Volunteer Registration</h3>
+						<h3>Registration</h3>
 					</div>
 					<div class="panel-body">
 						<div class="row">
@@ -643,11 +685,18 @@ class TEOVolunteerFormView extends NaviView {
 			`);
 
 			if (model.get('vAppStatus') == 'Approved' && model.get('vStatus') == 'Active') {
-				$('#' + _this.className + '_dt').after('<p><button type="button" class="btn btn-default btn-register">Register</button></p>');
+				$('#' + _this.className + '_dt').after('<p><button type="button" class="btn btn-default btn-register">Register</button> <button type="button" class="btn btn-default btn-export-excel" style="margin: 0;">Export Excel</button></p>');
 				$('.btn-register', _this.$topRegion).on('click', function(e) {
 					e.preventDefault();
-					_this.navi.openView(_this.initOptions.registrationForm, { returnView: _this, volunteerData: model.toJSON() }, null, true);
+					_this.navi.openView(_this.initOptions.registrationForm, {
+						returnView: _this,
+						volunteerData: model.toJSON()
+					}, null, true);
 				})
+				$('.btn-export-excel', _this.$topRegion).on('click', function(e) {
+					e.preventDefault();
+					$('.buttons-excel', _this.$topRegion).trigger('click');
+				});
 			}
 
 			$('.btn-close', _this.$topRegion).on('click', function(e) {
@@ -685,49 +734,51 @@ class TEOVolunteerFormView extends NaviView {
 					'copy', 'csv', 'excel', 'pdf', 'print'
 				],
 				columns: [
-				// {
-				// 	data: 'id',
-				// 	checkboxes: {
-				// 		'selectRow': true
-				// 	},
-				// 	orderable: false
-				// },
-				{
-					data: 'rEName',
-					title: 'Event Name',
-					default: ''
-				}, {
-					data: 'rETypeOf',
-					title: 'Event Type',
-					default: ''
-				}, {
-					data: 'rEDate',
-					title: 'Event Date',
-					default: ''
-				}, {
-					data: 'vLName',
-					title: 'Volunteer',
-					default: '',
-					render: function(data, type, row) {
-						return row.vLName + ', ' + row.vFName;
+					// {
+					// 	data: 'id',
+					// 	checkboxes: {
+					// 		'selectRow': true
+					// 	},
+					// 	orderable: false
+					// },
+					{
+						data: 'eDate',
+						title: 'Event Date',
+						default: ''
+					}, {
+						data: 'rEName',
+						title: 'Event Name',
+						default: ''
+					}, {
+						data: 'rEType',
+						title: 'Event Type',
+						default: ''
+					}, {
+
+						data: 'vLName',
+						title: 'Volunteer',
+						default: '',
+						render: function(data, type, row) {
+							return row.vLName + ', ' + row.vFName;
+						}
+					}, {
+						data: 'vLName',
+						title: 'Last Name',
+						default: '',
+						visible: false
+					}, {
+						data: 'vFName',
+						title: 'First Name',
+						default: '',
+						visible: false
+					}, {
+						data: 'id',
+						title: 'Action',
+						render: function() {
+							return '<button type="button" class="btn btn-default">View</button>'
+						}
 					}
-				}, {
-					data: 'vLName',
-					title: 'Last Name',
-					default: '',
-					visible: false
-				}, {
-					data: 'vFName',
-					title: 'First Name',
-					default: '',
-					visible: false
-				}, {
-					data: 'id',
-					title: 'Action',
-					render: function() {
-						return '<button type="button" class="btn btn-default">View</button>'
-					}
-				}],
+				],
 				// order: [
 				// 	[2, "asc"]
 				// ],
@@ -735,8 +786,9 @@ class TEOVolunteerFormView extends NaviView {
 				// 	'style': 'multi'
 				// },
 				"serverSide": true,
+				scrollX: true,
 				ajax: {
-					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and mainId eq \'' + model.get('id') + '\'',
+					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and MainID eq \'' + model.get('MainID') + '\'',
 					data: bridge.data(),
 					dataFilter: bridge.dataFilter()
 				}
@@ -836,18 +888,75 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	submit(model) {
-		console.log(model.toJSON());
-		if (this.id) {
-			this.putRecord(model);
-		} else {
-			this.postRecord(model);
-		}
+		$('#' + this.className + 'vAttachments').get(0).cotDropzone.finalize(() => { // data) {
+			var json = model.toJSON();
+			if (json.vAttachments) {
+				json.vAttachments = json.vAttachments.map((file) => {
+					var bin_id;
+					if (file.bin_id) {
+						bin_id = file.bin_id;
+					} else {
+						try {
+							bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+						} catch (e) {
+							bin_id = null;
+						}
+					}
+					return {
+						bin_id: bin_id,
+						name: file.name,
+						size: file.size,
+						status: file.status,
+						type: file.type
+					}
+				});
+			}
+			if (this.id) {
+				this.putRecord(json);
+			} else {
+				this.postRecord(json);
+			}
+		});
 	}
 
-	putRecord(model) {
+	putRecord(json) {
 		$(':input').prop('disabled', true);
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + this.id + '\')';
+
+		json = {
+			MainID: json.MainID || this.id,
+			vAODA: json.vAODA,
+			vAddress: json.vAddress,
+			vAge: json.vAge,
+			vAppStatus: json.vAppStatus,
+			vAttachments: json.vAttachments,
+			vCity: json.vCity,
+			vDateApproved: moment(json.vDateApproved).isValid() ? moment(json.vDateApproved).utc().format() : null,
+			vDateSubmitted: moment(json.vDateSubmitted).isValid() ? moment(json.vDateSubmitted).utc().format() : null,
+			vEmail: json.vEmail,
+			vEmergName: json.vEmergName,
+			vEmergPhone: json.vEmergPhone,
+			vEmergPhoneAlt: json.vEmergPhoneAlt,
+			vEmergRel: json.vEmergRel,
+			vFName: json.vFName,
+			vForms: json.vForms,
+			vGradDate: moment(json.vGradDate).isValid() ? moment(json.vGradDate).utc().format() : null,
+			vGraduate: json.vGraduate,
+			vLName: json.vLName,
+			vLang: json.vLang,
+			vLanguageOther: json.vLanguageOther,
+			vNotes: json.vNotes,
+			vPCode: json.vPCode,
+			vPhoneCell: json.vPhoneCell,
+			vPhoneDay: json.vPhoneDay,
+			vPhoneEve: json.vPhoneEve,
+			vSource: json.vSource,
+			vSourceOther: json.vSourceOther,
+			vStatus: json.vStatus,
+			vToronto: json.vToronto
+		}
+
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -856,7 +965,7 @@ class TEOVolunteerFormView extends NaviView {
 				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(model.toJSON()),
+			data: JSON.stringify(json),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
 				alert('An error has occured. ', errorThrown);
@@ -868,10 +977,44 @@ class TEOVolunteerFormView extends NaviView {
 		});
 	}
 
-	postRecord(model) {
+	postRecord(json) {
 		$(':input').prop('disabled', true);
 		const _this = this;
 		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer';
+
+		json = {
+			MainID: json.MainID,
+			vAODA: json.vAODA,
+			vAddress: json.vAddress,
+			vAge: json.vAge,
+			vAppStatus: json.vAppStatus,
+			vAttachments: json.vAttachments,
+			vCity: json.vCity,
+			vDateApproved: moment(json.vDateApproved).isValid() ? moment(json.vDateApproved).utc().format() : null,
+			vDateSubmitted: moment(json.vDateSubmitted).isValid() ? moment(json.vDateSubmitted).utc().format() : null,
+			vEmail: json.vEmail,
+			vEmergName: json.vEmergName,
+			vEmergPhone: json.vEmergPhone,
+			vEmergPhoneAlt: json.vEmergPhoneAlt,
+			vEmergRel: json.vEmergRel,
+			vFName: json.vFName,
+			vForms: json.vForms,
+			vGradDate: moment(json.vGradDate).isValid() ? moment(json.vGradDate).utc().format() : null,
+			vGraduate: json.vGraduate,
+			vLName: json.vLName,
+			vLang: json.vLang,
+			vLanguageOther: json.vLanguageOther,
+			vNotes: json.vNotes,
+			vPCode: json.vPCode,
+			vPhoneCell: json.vPhoneCell,
+			vPhoneDay: json.vPhoneDay,
+			vPhoneEve: json.vPhoneEve,
+			vSource: json.vSource,
+			vSourceOther: json.vSourceOther,
+			vStatus: json.vStatus,
+			vToronto: json.vToronto
+		}
+
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -880,7 +1023,7 @@ class TEOVolunteerFormView extends NaviView {
 				$(':input').prop('disabled', false);
 			},
 			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(model.toJSON()),
+			data: JSON.stringify(json),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
 				alert('An error has occured. ', errorThrown);
@@ -912,6 +1055,9 @@ class TEOVolunteerFormView extends NaviView {
 			},
 			method: 'GET',
 			success: function success(data) { // , textStatus, jqXHR) {
+				data.vDateApproved = moment(data.vDateApproved).isValid() ? moment(data.vDateApproved).format('MM/DD/YYYY') : '';
+				data.vDateSubmitted = moment(data.vDateSubmitted).isValid() ? moment(data.vDateSubmitted).format('MM/DD/YYYY') : '';
+				data.vGradDate = moment(data.vGradDate).isValid() ? moment(data.vGradDate).format('MM/DD/YYYY') : '';
 				callback(data);
 			}
 		});

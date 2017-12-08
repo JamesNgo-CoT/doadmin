@@ -82,7 +82,7 @@ class Navi {
 
 			// Callback for possible async operation.
 			const _this = this;
-			function done() {
+			const done = () => {
 				const viewObject = viewSource.instances[instanceKey];
 				_this.lastViewObject = viewObject;
 				viewObject.show(showOptions);

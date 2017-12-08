@@ -94,46 +94,100 @@
 		margin-bottom: 15px;
 		margin-top: 15px;
 	}
+	// .dataTable {
+	// 	th {
+	// 		padding-right: 30px;
+	// 	}
+	//
+	// 	td,
+	// 	th {
+	// 		max-width: 200px;
+	// 		overflow: hidden;
+	// 		text-overflow: ellipsis;
+	// 		white-space: nowrap;
+	// 	}
+	//
+	// 	button {
+	// 		margin: -12px 0 -10px 0;
+	// 	}
+	//
+	// 	tr.selected {
+	// 		background-color: rgba(0, 119, 204, .9);
+	// 		color: #fff;
+	//
+	// 		&:nth-of-type(2n+2) {
+	// 			background-color: rgba(0, 119, 204, 1);
+	// 			color: #fff;
+	// 		}
+	// 	}
+	// }
+	//
+	// .dataTables_info {
+	// }
+	//
+	// .dataTables_paginate ul.pagination {
+	// 	padding: 5px 0 5px 0;
+	// }
+	//
+	// .dt-buttons {
+	// 	display: none;
+	// }
+	.oDataTable {
+		table.dataTable {
+			td,
+			th {
+				max-width: 200px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 
-	.dataTable {
-		th {
-			padding-right: 30px;
-		}
+			}
 
-		td,
-		th {
-			max-width: 300px;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
+			thead th {
+				padding-right: 40px;
+				vertical-align: top;
 
-		button {
-			margin: -12px 0 -10px 0;
-		}
+				div {
 
-		tr.selected {
-			background-color: rgba(0, 119, 204, .9);
-			color: #fff;
 
-			&:nth-of-type(2n+2) {
-				background-color: rgba(0, 119, 204, 1);
-				color: #fff;
+
+					input,
+					select {
+						font-weight: normal;
+						padding: 4px;
+						width: 100%;
+						border-radius: 4px;
+						border: 1px solid #ddd;
+					}
+				}
+
+				&.sorting:after, &.sorting_asc:after, &.sorting_desc:after, &.sorting_asc_disabled:after, &.sorting_desc_disabled:after {
+					bottom: auto;
+					top: 10px;
+					right: 8px;
+				}
+			}
+
+			tbody td {
+				button.btn {
+					margin: 0;
+				}
+			}
+
+			tfoot td {
+				input,
+				select {
+					font-weight: normal;
+					padding: 4px;
+					width: 100%;
+					border-radius: 4px;
+					border: 1px solid #ddd;
+				}
 			}
 		}
 
-
-	}
-
-	.dataTables_info {
-
-	}
-
-	.dataTables_paginate ul.pagination {
-		padding: 5px 0 5px 0;
-	}
-
-	.dt-buttons {
-		display: none;
+		.dt-buttons {
+			display: none;
+		}
 	}
 }
