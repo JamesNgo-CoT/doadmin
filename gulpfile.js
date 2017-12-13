@@ -41,8 +41,8 @@ const imageDir = 'img';
 const scriptDir = 'scripts';
 const styleDir = 'styles';
 //where is this app deployed? can be overridden locally in your env file
-const devDeployPath = 'Z:\\webapps\\livegreen_volunteer';
-const qaDeployPath = 'z:\\webapps\\work\\decom\\livegreen_volunteer';
+const devDeployPath = 'z:\\webapps\\live_green_volunteer';
+const qaDeployPath = 'z:\\webapps\\work\\decom\\live_green_volunteer';
 
 //should we minify stuff during tasks? this is set to true in deploy tasks
 let compress = false;

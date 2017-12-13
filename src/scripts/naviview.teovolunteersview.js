@@ -1,5 +1,5 @@
 /* exported TEOVolunteersView */
-/* global NaviView Mustache DataTablesODataBridge CotSession moment */
+/* global NaviView Mustache DataTablesODataBridge CotSession moment baseEntityUrl */
 
 class TEOVolunteersView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -64,15 +64,13 @@ class TEOVolunteersView extends NaviView {
 
 		const templ = `
 			<p>
-				<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
-				<button type="button" class="btn btn-default btn-add" style="margin: 0;">Add Volunteer</button>
+				<button type="button" class="btn btn-primary btn-reload" style="margin: 0;">Reload</button>
+				<button type="button" class="btn btn-primary btn-add" style="margin: 0;">Add Volunteer</button>
 			</p>
-
-			<table id="{{id}}" style="width: 100%;"></table>
-
+			<div class="oDataTable"><table id="{{id}}" style="width: 100%;"></table></div>
 			<p>
-				<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
-				<button type="button" class="btn btn-default btn-add" style="margin: 0;">Add Volunteer</button>
+				<button type="button" class="btn btn-primary btn-reload" style="margin: 0;">Reload</button>
+				<button type="button" class="btn btn-primary btn-add" style="margin: 0;">Add Volunteer</button>
 			</p>
 		`;
 		const data = {
@@ -85,32 +83,28 @@ class TEOVolunteersView extends NaviView {
 			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
 				this.initOptions.cotLogin.logout();
 			} else {
-				this.dt = $('#' + data.id).DataTable({
-					// dom: 'lfrtipB',
-					dom: '<\'row\'<\'col-sm-6\'l><\'col-sm-6\'f>>' + '<\'row\'<\'col-sm-12\'tr>>' + '<\'row\'<\'col-sm-5\'i><\'col-sm-7\'p>>B',
-					buttons: [
-						'copy', 'csv', 'excel', 'pdf', 'print'
-					],
+				const $table = $('#' + data.id);
+				$table.oDataTable({
+					ajax: {
+						headers: {
+							'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+						},
+						url: baseEntityUrl + '/Volunteer',
+					},
 					columns: [
-						// 	{
-						// 	data: 'id',
-						// 	'checkboxes': {
-						// 		'selectRow': true
-						// 	},
-						// 	orderable: false
-						// },
-
 						{
 							data: '__CreatedOn',
 							title: 'Creation Date',
 							default: '',
 							render: function(data) {
-								return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-							}
+								return moment(data).isValid() ? moment(data).format('l') : '';
+							},
+							searchType: 'date'
 						}, {
 							data: 'vLName',
 							title: 'Last Name',
-							default: ''
+							default: '',
+							sortOrder: 'asc'
 						}, {
 							data: 'vFName',
 							title: 'First Name',
@@ -125,7 +119,8 @@ class TEOVolunteersView extends NaviView {
 							default: '',
 							render: function(data) {
 								return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-							}
+							},
+							searchType: 'date'
 						}, {
 							data: 'vStatus',
 							title: 'Status',
@@ -139,32 +134,38 @@ class TEOVolunteersView extends NaviView {
 							title: 'Languages',
 							default: ''
 						}, {
+							className: 'action',
 							data: 'id',
 							title: 'Action',
 							render: () => {
-								return '<button type="button" class="btn btn-default">View</button>'
-							}
+								return '<button type="button" class="btn btn-primary">View</button>'
+							},
+							orderable: false,
+							searchable: false
 						}
 					],
-					// order: [
-					// 	[2, "asc"]
-					// ],
-					// select: {
-					// 	'style': 'multi'
-					// },
-					serverSide: true,
-					scrollX: true,
-					ajax: {
-						url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer?$format=application/json&$filter=__Status ne \'DEL\'',
-						data: this.bridge.data(),
-						dataFilter: this.bridge.dataFilter(),
-						headers: {
-							'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
-						}
-					}
+					dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+					lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
 				});
-				$('#' + this.className + '_dataTable tbody').on('click', (e) => {
-					if ($(e.target).is('.btn')) {
+				this.dt = $table.DataTable();
+
+				$('#' + this.className + '_dataTable tbody')
+					.on('click', (e) => {
+						if ($(e.target).is('.btn')) {
+							e.preventDefault();
+							var data = this.dt.row($(e.target).closest('tr')).data();
+							const sourceKey = this.initOptions.formView;
+							const showOptions = {
+								operation: 'view',
+								id: data.id,
+								returnView: this
+							};
+							const instanceKey = null;
+							const autoInstanceKey = true;
+							this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+						}
+					})
+					.on('dblclick', (e) => {
 						e.preventDefault();
 						var data = this.dt.row($(e.target).closest('tr')).data();
 						const sourceKey = this.initOptions.formView;
@@ -176,8 +177,7 @@ class TEOVolunteersView extends NaviView {
 						const instanceKey = null;
 						const autoInstanceKey = true;
 						this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
-					}
-				});
+					});
 			}
 		}, true);
 

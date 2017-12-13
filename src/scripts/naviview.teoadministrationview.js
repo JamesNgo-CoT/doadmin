@@ -1,5 +1,5 @@
 /* exported TEOAdministrationView */
-/* global NaviView CotForm2 Mustache */
+/* global NaviView CotForm2 Mustache baseConfigUrl */
 
 class TEOAdministrationView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -54,15 +54,15 @@ class TEOAdministrationView extends NaviView {
 
 			const template = `
 				<p>
-					<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
-					<button type="button" class="btn btn-default btn-update" style="margin: 0;">Update</button>
+					<!-- <button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button> -->
+					<button type="button" class="btn btn-primary btn-update" style="margin: 0;">Update</button>
 				</p>
 
 				<div class="{{classname}}_formWrapper"></div>
 
 				<p>
-					<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
-					<button type="button" class="btn btn-default btn-update" style="margin: 0;">Update</button>
+					<!-- <button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button> -->
+					<button type="button" class="btn btn-primary btn-update" style="margin: 0;">Update</button>
 				</p>
 			`;
 
@@ -72,7 +72,6 @@ class TEOAdministrationView extends NaviView {
 
 			$('.btn-update', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
-				console.log('click');
 				_this.show({
 					operation: 'update'
 				});
@@ -128,11 +127,11 @@ class TEOAdministrationView extends NaviView {
 		$(':input').prop('disabled', true);
 		const data = {
 			ConfigContent: btoa(JSON.stringify(this.model.toJSON())),
-			ContentType:"application/json",
-			QualifiedName:"TEOVolunteer/administration.json"
+			ContentType: "application/json",
+			QualifiedName: "TEOVolunteer/administration.json"
 		};
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_config/v2/ConfigService.svc/ConfigSet(\'TEOVolunteer/administration.json\')';
+		const url = baseConfigUrl + '(\'TEOVolunteer/administration.json\')';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -155,7 +154,7 @@ class TEOAdministrationView extends NaviView {
 
 	action_getConfig(cbk) {
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_config/v2/ConfigService.svc/ConfigSet(\'TEOVolunteer/administration.json\')?$format=application/json';
+		const url = baseConfigUrl + '(\'TEOVolunteer/administration.json\')?$format=application/json';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid

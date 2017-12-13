@@ -1,4 +1,5 @@
 /* global moment */
+
 (function($) {
 
 	// Frequently used options.
@@ -6,6 +7,7 @@
 		ajax: {},
 		buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
 		dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+		scrollX: true,
 		serverSide: true
 	};
 
@@ -15,47 +17,31 @@
 	$.fn.oDataTable = function(options) {
 		options = $.extend({}, defaultOptions, options);
 
-		// Sort Order
-		const columns = options.columns || [];
-		const columnsLength = columns.length;
-		const order = [];
-		for (let i = 0; i < columnsLength; i++) {
-			if (columns[i].sortOrder) {
-				order.push([i, columns[i].sortOrder]);
-			}
-		}
-		if (order.length) {
-			options.order = order;
-		}
-
 		// Add default initComplete option.
 		// Implementation adds header and footer search filter.
 		// Add searchType options in option.columns to alter search filter type.
-		options.initComplete = function() {
-			if (options.onInitComplete) {
-				options.onInitComplete.apply(null, arguments);
-			}
-
-			if (options.searching != false) {
-				this.api().columns().every(function() {
-					const column = this;
-					const columnOptions = options.columns[column.index()];
-
-					if (columnOptions.searchable != false) {
-						let searchType = columnOptions.searchType;
-						if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
-							searchType = 'default';
+		if (!options.initComplete) {
+			options.initComplete = function() {
+				if (options.searching != false) {
+					this.api().columns().every(function() {
+						const column = this;
+						const columnOptions = options.columns[column.index()];
+						if (columnOptions.searchable != false) {
+							let searchType = columnOptions.searchType;
+							if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
+								searchType = 'default';
+							}
+							const searchChoices = columnOptions.searchChoices;
+							if (searchChoices) {
+								$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter_searchChoices(column, options, columnOptions, searchChoices);
+							} else {
+								$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter(column, options, columnOptions);
+							}
 						}
-						const searchChoices = columnOptions.searchChoices;
-						if (searchChoices) {
-							$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter_searchChoices(column, options, columnOptions, searchChoices);
-						} else {
-							$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter(column, options, columnOptions);
-						}
-					}
-				});
-			}
-		};
+					});
+				}
+			};
+		}
 
 		// Standard JQuery plugin implementation.
 		return this.each(function() {
@@ -75,116 +61,100 @@
 
 			// oData Bridge. Allow datatable to access odata values.
 			let draw;
+			if (!options.ajax.data) {
+				options.ajax.data = (data) => {
+					draw = data.draw;
 
-			options.ajax.data = (data) => {
-				if (options.ajax.onData) {
-					options.ajax.onData.call(null, data);
-				}
+					const retData = {};
 
-				draw = data.draw;
+					// $COUNT parameter.
+					retData['$count'] = 'true';
 
-				const retData = {};
-
-				// $COUNT parameter.
-				retData['$count'] = 'true';
-
-				// $FILTER parameter.
-				retData['$filter'] = data.columns.filter((column, index) => {
-					if (column.searchable && column.search != null && column.search.value) {
-						let searchType = options.columns[index].searchType;
-						if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
-							searchType = 'default';
+					// $FILTER parameter.
+					retData['$filter'] = data.columns.concat([{
+						topLevelFilter: options.topLevelFilter
+					}]).filter((column, index) => {
+						if (column.topLevelFilter) {
+							column.filterString = column.topLevelFilter;
+							return column.topLevelFilter;
 						}
-						column.filterString = $.fn.oDataTable.SearchTypes[searchType].getFilterString(column.data, column.search.value);
+						if (column.searchable && column.search != null && column.search.value) {
+							let searchType = options.columns[index].searchType;
+							if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
+								searchType = 'default';
+							}
+							column.filterString = $.fn.oDataTable.SearchTypes[searchType].getFilterString(column.data, column.search.value);
+							return column.filterString;
+						}
+						return false;
+					}).map((column) => {
 						return column.filterString;
+					}).join(' and ') || null;
+
+					// $ORDERBY parameter.
+					retData['$orderby'] = data.order.map((order) => {
+						return `${data.columns[order.column].data} ${order.dir}`;
+					}).join(',') || null;
+
+					// $SEARCH parameter.
+					retData['$search'] = (() => data.search && data.search.value ? data.search.value : null)();
+
+					// $SELECT parameter.
+					retData['$select'] = data.columns.filter((column, index, array) => {
+						return array.indexOf(column) === index;
+					}).map((column) => {
+						return column.data;
+					}).join(',');
+
+					// $SKIP parameter.
+					retData['$skip'] = data.start;
+
+					// $TOP parameter.
+					retData['$top'] = data.length;
+
+					const retVal = [];
+					for (var k in retData) {
+						if (retData[k] != null) {
+							retVal.push(k + '=' + retData[k]);
+						}
 					}
-					return false;
-				}).map((column) => {
-					return column.filterString;
-				}).join(' and ') || null;
-
-				if (options['$filter']) {
-					retData['$filter'] = retData['$filter'] ? `(${retData['$filter']}) and ${options['$filter']}` : options['$filter'];
+					return retVal.join('&');
+				};
+			}
+			if (!options.ajax.dataFilter) {
+				options.ajax.dataFilter = (data) => {
+					data = JSON.parse(data);
+					return JSON.stringify({
+						draw: draw,
+						recordsTotal: data['@odata.count'],
+						recordsFiltered: data['@odata.count'],
+						data: data.value
+					});
 				}
-
-				// $ORDERBY parameter.
-				retData['$orderby'] = data.order.map((order) => {
-					return `${data.columns[order.column].data} ${order.dir}`;
-				}).join(',') || null;
-
-				if (options['$orderby']) {
-					retData['$orderby'] = retData['$orderby'] ? `(${retData['$orderby']}),${options['$orderby']}` : options['$orderby'];
-				}
-
-				// $SEARCH parameter.
-				retData['$search'] = (() => data.search && data.search.value ? '"' + data.search.value + '"' : null)();
-
-				// $SELECT parameter.
-				retData['$select'] = data.columns.filter((column, index, array) => {
-					return array.indexOf(column) === index;
-				}).map((column) => {
-					return column.data;
-				}).join(',');
-
-				if (options['$select']) {
-					retData['$select'] = retData['$select'] ? `${retData['$select']},${options['$select']}` : options['$select'];
-				}
-
-				// $SKIP parameter.
-				retData['$skip'] = data.start;
-
-				// $TOP parameter.
-				retData['$top'] = data.length;
-
-				const retVal = [];
-				for (var k in retData) {
-					if (retData[k] != null) {
-						retVal.push(k + '=' + retData[k]);
-					}
-				}
-
-				return retVal.join('&');
-			};
-
-			options.ajax.dataFilter = (data) => {
-				data = JSON.parse(data);
-
-				const retValue = JSON.stringify({
-					draw: draw,
-					recordsTotal: data['@odata.count'],
-					recordsFiltered: data['@odata.count'],
-					data: data.value
-				});
-
-				if (options.ajax.onDataFilter) {
-					options.ajax.onDataFilter.call(null, data, retValue);
-				}
-
-				return retValue;
-			};
+			}
 
 			// Turn table into datatable.
 			$table.DataTable(options);
 		});
 	}
 
-	$.fn.oDataTable.headerWrapperString = '<div>';
-
+	// Search type functions.
 	$.fn.oDataTable.SearchTypes = {};
 
 	$.fn.oDataTable.SearchTypes['default'] = $.fn.oDataTable.SearchTypes['string'] = $.fn.oDataTable.SearchTypes['string-contains'] = {
 		getFilterString: (column, value) => {
-			return `contains(tolower(${column}), '${value.toLowerCase()}')`;
+			// return `contains(tolower(${column}), tolower('${value}'))`;
+			return `contains(${column}, '${value}')`;
 		},
-		setHeaderFooter: (column, options) => { // }, columnOptions) => {
+		setHeaderFooter: (column, options) => { //, columnOptions) => {
 			let initialValue = '';
 			const index = column.index();
 			if (options && options.searchCols && options.searchCols[index] && options.searchCols[index].search) {
 				initialValue = options.searchCols[index].search;
 			}
 
-			const $input = $(`<input type="text" style="font-weight: normal; padding: 4px; width: 100%; border-radius: 4px; border: 1px solid #ddd;" value="${initialValue}">`);
-			$input.on('change keyup', function() { // e) {
+			const $input = $(`<input type="text" value="${initialValue}">`);
+			$input.on('change keyup', function() {
 				column.search($(this).val());
 				column.draw();
 			});
@@ -193,13 +163,13 @@
 			$headerInput.on('click', function(e) {
 				e.stopPropagation();
 			});
-			$headerInput.on('change keyup', function() { // e) {
+			$headerInput.on('change keyup', function() {
 				$footerInput.val($(this).val());
 			});
-			$(column.header()).append($($.fn.oDataTable.headerWrapperString).append($headerInput));
+			$(column.header()).append($('<div style="margin-right: -25px;"></div>').append($headerInput));
 
 			const $footerInput = $input.clone(true);
-			$footerInput.on('change keyup', function() { // e) {
+			$footerInput.on('change keyup', function() {
 				$headerInput.val($(this).val());
 			});
 			$(column.footer()).append($footerInput);
@@ -235,8 +205,8 @@
 			}
 
 			const selectOptions = searchChoices.map((choice) => `<option value="${choice.value}"${(() => choice.selected ? 'selected' : '')()}>${choice.text}</option>`).join('');
-			const $select = $(`<select style="font-weight: normal; padding: 4px; width: 100%; border-radius: 4px; border: 1px solid #ddd;">${selectOptions}</select>`);
-			$select.on('change', function() { //e) {
+			const $select = $(`<select">${selectOptions}</select>`);
+			$select.on('change', function() {
 				if ($(this).val()) {
 					column.search($(this).val());
 				} else {
@@ -247,12 +217,12 @@
 
 			const $headerSelect = $select.clone(true).on('click', function(e) {
 				e.stopPropagation();
-			}).on('change', function() { // e) {
+			}).on('change', function() {
 				$footerSelect.val($(this).val());
 			});
-			$(column.header()).append($($.fn.oDataTable.headerWrapperString).append($headerSelect));
+			$(column.header()).append($('<div></div>').append($headerSelect));
 
-			const $footerSelect = $select.clone(true).on('change', function() { // e) {
+			const $footerSelect = $select.clone(true).on('change', function() {
 				$headerSelect.val($(this).val());
 			});
 			$(column.footer()).append($footerSelect);
@@ -265,7 +235,7 @@
 		},
 		setHeaderFooter: $.fn.oDataTable.SearchTypes['default'].setHeaderFooter,
 		setHeaderFooter_searchChoices: $.fn.oDataTable.SearchTypes['default'].setHeaderFooter_searchChoices
-	};
+	}
 
 	$.fn.oDataTable.SearchTypes['date'] = $.fn.oDataTable.SearchTypes['date-between'] = {
 		getFilterString: (column, value) => {
@@ -278,23 +248,23 @@
 				return '';
 			}
 
-			const start = moment(dates[0], 'MM/DD/YYYY').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-			const end = moment(dates[1], 'MM/DD/YYYY').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+			const start = moment(dates[0]).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+			const end = moment(dates[1]).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 			if (start == 'Invalid date' || end == 'Invalid date') {
 				return '';
 			}
 
 			return `(${column} ge ${start} and ${column} le ${end})`;
 		},
-		setHeaderFooter: (column, options) => { // }, columnOptions) => {
+		setHeaderFooter: (column, options) => { //, columnOptions) => {
 			let initialValue = '';
 			const index = column.index();
 			if (options && options.searchCols && options.searchCols[index] && options.searchCols[index].search) {
 				initialValue = options.searchCols[index].search;
 			}
 
-			const $input = $(`<input type="text" style="font-weight: normal; padding: 4px; width: 100%; border-radius: 4px; border: 1px solid #ddd;" value="${initialValue}">`);
-			$input.on('change keyup', function() { // e) {
+			const $input = $(`<input type="text"" value="${initialValue}">`);
+			$input.on('change keyup', function() {
 				column.search($(this).val());
 				column.draw();
 			});
@@ -303,34 +273,34 @@
 			$headerInput.on('click', function(e) {
 				e.stopPropagation();
 			});
-			$headerInput.on('change keyup', function() { // e) {
+			$headerInput.on('change keyup', function() {
 				$footerInput.val($(this).val());
 			});
 			$headerInput.daterangepicker({
 				autoUpdateInput: false
 			});
 			$headerInput.on('apply.daterangepicker', (e, p) => {
-				$headerInput.val(`${p.startDate.format('MM/DD/YYYY')} - ${p.endDate.format('MM/DD/YYYY')}`);
+				$headerInput.val(`${p.startDate.format('YYYY/MM/DD')} - ${p.endDate.format('YYYY/MM/DD')}`);
 				$headerInput.trigger('change');
 			});
-			$(column.header()).append($($.fn.oDataTable.headerWrapperString).append($headerInput));
+			$(column.header()).append($('<div style="margin-right: -26px;"></div>').append($headerInput));
 
 			const $footerInput = $input.clone(true);
 			$footerInput.on('click', function(e) {
 				e.stopPropagation();
 			});
-			$footerInput.on('change keyup', function() { // e) {
+			$footerInput.on('change keyup', function() {
 				$headerInput.val($(this).val());
 			});
 			$footerInput.daterangepicker({
 				autoUpdateInput: false
 			});
 			$footerInput.on('apply.daterangepicker', (e, p) => {
-				$footerInput.val(`${p.startDate.format('MM/DD/YYYY')} - ${p.endDate.format('MM/DD/YYYY')}`);
+				$footerInput.val(`${p.startDate.format('YYYY/MM/DD')} - ${p.endDate.format('YYYY/MM/DD')}`);
 				$footerInput.trigger('change');
 			});
 			$(column.footer()).append($footerInput);
 		},
 		setHeaderFooter_searchChoices: $.fn.oDataTable.SearchTypes['default'].setHeaderFooter_searchChoices
-	};
+	}
 })(jQuery);

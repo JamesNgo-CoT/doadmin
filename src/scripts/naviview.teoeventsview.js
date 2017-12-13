@@ -1,5 +1,5 @@
 /* exported TEOEventsView */
-/* global NaviView Mustache moment DataTablesODataBridge */
+/* global NaviView Mustache moment baseEntityUrl */
 
 class TEOEventsView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -47,7 +47,7 @@ class TEOEventsView extends NaviView {
 		}];
 		this.inDynamicMenu = false;
 
-		this.bridge = new DataTablesODataBridge();
+		// this.bridge = new DataTablesODataBridge();
 
 		this.render();
 	}
@@ -60,15 +60,15 @@ class TEOEventsView extends NaviView {
 		// HTML.
 		const templ = `
 			<p>
-				<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
-				<button type="button" class="btn btn-default btn-add" style="margin: 0;">Add Event</button>
+				<button type="button" class="btn btn-primary btn-reload" style="margin: 0;">Reload</button>
+				<button type="button" class="btn btn-primary btn-add" style="margin: 0;">Add Event</button>
 			</p>
 
-			<table id="{{id}}" style="width: 100%;"></table>
+			<div class="oDataTable"><table id="{{id}}" style="width: 100%;"></table></div>
 
 			<p>
-				<button type="button" class="btn btn-default btn-reload" style="margin: 0;">Reload</button>
-				<button type="button" class="btn btn-default btn-add" style="margin: 0;">Add Event</button>
+				<button type="button" class="btn btn-primary btn-reload" style="margin: 0;">Reload</button>
+				<button type="button" class="btn btn-primary btn-add" style="margin: 0;">Add Event</button>
 			</p>
 		`;
 		const data = {
@@ -87,78 +87,81 @@ class TEOEventsView extends NaviView {
 			_this.action_newEvent();
 		});
 
-		this.dt = $('#' + data.id).DataTable({
-			dom: '<\'row\'<\'col-sm-6\'l><\'col-sm-6\'f>>' + '<\'row\'<\'col-sm-12\'tr>>' + '<\'row\'<\'col-sm-5\'i><\'col-sm-7\'p>>B',
-			buttons: [
-				'copy', 'csv', 'excel', 'pdf', 'print'
-			],
-			columns: [
-			// {
-			// 	data: 'id',
-			// 	checkboxes: {
-			// 		'selectRow': true
-			// 	},
-			// 	orderable: false
-			// },
-			{
+		const $table = $('#' + data.id);
+		$table.oDataTable({
+			ajax: {
+				url: baseEntityUrl + '/Event',
+				headers: {
+					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+				}
+			},
+			columns: [{
+				class: 'noMaxWidth',
 				data: 'eName',
 				title: 'Event Name',
 				default: ''
 			}, {
 				data: 'eTypeOf',
 				title: 'Event Type',
-				default: ''
+				default: '',
+				searchChoices: ['', 'Training', 'Outreach', 'Special Event']
 			}, {
 				data: 'eDate',
 				title: 'Event Date',
 				default: '',
 				render: function(data) {
-					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-				}
+					return moment(data).isValid() ? moment(data).format('l') : '';
+				},
+				searchType: 'date'
 			}, {
+				className: 'action',
 				data: 'id',
 				title: 'Action',
 				render: function() {
-					return '<button type="button" class="btn btn-default">View</button>'
-				}
+					return '<button type="button" class="btn btn-primary">View</button>'
+				},
+				orderable: false,
+				searchable: false
 			}],
-			// order: [
-			// 	[2, "asc"]
-			// ],
-			// 'select': {
-			// 	'style': 'multi'
-			// },
-			"serverSide": true,
-			ajax: {
-				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=__Status ne \'DEL\'',
-				data: this.bridge.data(),
-				dataFilter: this.bridge.dataFilter(),
-				headers: {
-					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
-				}
-			}
+			dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+			lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
 		});
 
-		$('#' + this.className + '_dataTable tbody').on('click', function(e) {
-			if ($(e.target).is('.btn')) {
+		this.dt = $table.DataTable();
+
+		$('#' + this.className + '_dataTable tbody')
+			.on('click', function(e) {
+				if ($(e.target).is('.btn')) {
+					e.preventDefault();
+					var data = _this.dt.row($(e.target).closest('tr')).data();
+					const sourceKey = _this.initOptions.formView;
+					const showOptions = {
+						operation: 'view',
+						id: data.id,
+						returnView: _this
+					};
+					const instanceKey = null;
+					const autoInstanceKey = true;
+					_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+				}
+			})
+			.on('dblclick', (e) => {
 				e.preventDefault();
-				var data = _this.dt.row($(e.target).closest('tr')).data();
-				const sourceKey = _this.initOptions.formView;
+				var data = this.dt.row($(e.target).closest('tr')).data();
+				const sourceKey = this.initOptions.formView;
 				const showOptions = {
 					operation: 'view',
 					id: data.id,
-					returnView: _this
+					returnView: this
 				};
 				const instanceKey = null;
 				const autoInstanceKey = true;
-				_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
-			}
-		});
+				this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+			});
 	}
 
 	show(options) {
 		super.show(options);
-		console.log(options);
 		if (options && options.operation == 'reload') {
 			this.action_reload();
 		}

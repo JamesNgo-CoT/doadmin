@@ -1,4 +1,8 @@
 #maincontent {
+	button {
+		margin: 0;
+	}
+
 	.navbar {
 		.container-fluid {
 			padding-left: 15px;
@@ -139,7 +143,7 @@
 				max-width: 200px;
 				overflow: hidden;
 				text-overflow: ellipsis;
-				white-space: nowrap;
+				// white-space: nowrap;
 
 			}
 

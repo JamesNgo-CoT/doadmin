@@ -1,5 +1,5 @@
 /* exported TEOVolunteerFormView */
-/* global NaviView CotForm2 moment DataTablesODataBridge Mustache */
+/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadUrl baseUploadSubmitUrl */
 
 class TEOVolunteerFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -50,7 +50,7 @@ class TEOVolunteerFormView extends NaviView {
 
 			sections: [{
 				title: 'Volunteer Details',
-				className: 'panel-info',
+				className: 'panel-default',
 
 				rows: [{
 					fields: [{
@@ -277,7 +277,7 @@ class TEOVolunteerFormView extends NaviView {
 				}]
 			}, {
 				title: 'Administration Details',
-				className: 'panel-info ',
+				className: 'panel-default ',
 
 				rows: [{
 					fields: [{
@@ -319,7 +319,10 @@ class TEOVolunteerFormView extends NaviView {
 						id: this.className + '_vDateSubmitted',
 						title: 'Date Submitted',
 						type: 'datetimepicker',
-						options: { format: 'MM/DD/YYYY', extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z'] },
+						options: {
+							format: 'MM/DD/YYYY',
+							extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z']
+						},
 						bindTo: 'vDateSubmitted'
 						//}]
 					}, {
@@ -456,7 +459,7 @@ class TEOVolunteerFormView extends NaviView {
 				}]
 			}, {
 				title: 'Attachments',
-				className: 'panel-info',
+				className: 'panel-default',
 
 				rows: [{
 					fields: [{
@@ -464,7 +467,7 @@ class TEOVolunteerFormView extends NaviView {
 						id: this.className + 'vAttachments',
 						options: {
 							maxFiles: 4,
-							url: 'https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/jngo2'
+							url: baseUploadSubmitUrl
 						},
 						bindTo: 'vAttachments'
 					}]
@@ -484,15 +487,15 @@ class TEOVolunteerFormView extends NaviView {
 
 		this.$topRegion.empty().html(`
 			<p>
-				<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-				<button type="button" class="btn btn-default btn-save" style="margin: 0;">Create</button>
+				<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
+				<button type="button" class="btn btn-success btn-save" style="margin: 0;">Create</button>
 			</p>
 
 			<div class="` + this.className + `_formWrapper"></div>
 
 			<p>
-				<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-				<button type="button" class="btn btn-default btn-save" style="margin: 0;">Create</button>
+				<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
+				<button type="button" class="btn btn-success btn-save" style="margin: 0;">Create</button>
 			</p>
 		`);
 
@@ -552,15 +555,15 @@ class TEOVolunteerFormView extends NaviView {
 			_this.title = model.get('vLName') + ', ' + model.get('vFName');
 			_this.$topRegion.empty().html(`
 				<p>
-					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-primary btn-done" style="margin: 0;">Done</button>
+					<button type="button" class="btn btn-success btn-save" style="margin: 0;">Save</button>
 				</p>
 
 				<div class="` + _this.className + `_formWrapper"></div>
 
 				<p>
-					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-primary btn-done" style="margin: 0;">Done</button>
+					<button type="button" class="btn btn-success btn-save" style="margin: 0;">Save</button>
 				</p>
 			`);
 
@@ -636,13 +639,15 @@ class TEOVolunteerFormView extends NaviView {
 								<ul>
 									{{#values}}
 									<li>
-										{{name}} (<a href="https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+										{{name}} (<a href="${baseUploadUrl}/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
 									</li>
 									{{/values}}
 								</ul>
 								`;
 								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'html';
-								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, { values: value });
+								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, {
+									values: value
+								});
 							} else {
 								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
 								previewFormDef.sections[i1].rows[i2].fields[i3].value = value;
@@ -657,20 +662,20 @@ class TEOVolunteerFormView extends NaviView {
 			_this.title = model.get('vLName') + ', ' + model.get('vFName');
 			_this.$topRegion.empty().html(`
 				<p>
-					<button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Update</button>
-					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
+					<button type="button" class="btn btn-primary btn-close" style="margin: 0;">Close</button>
+					<button type="button" class="btn btn-primary btn-save" style="margin: 0;">Update</button>
+					<button type="button" class="btn btn-danger btn-delete" style="margin: 0;">Delete</button>
 				</p>
 
 				<div class="` + _this.className + `_formWrapper"></div>
 
 				<p>
-					<button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Update</button>
-					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
+					<button type="button" class="btn btn-primary btn-close" style="margin: 0;">Close</button>
+					<button type="button" class="btn btn-primary btn-save" style="margin: 0;">Update</button>
+					<button type="button" class="btn btn-danger btn-delete" style="margin: 0;">Delete</button>
 				</p>
 
-				<div id="volunteerSection" class="panel panel-info">
+				<div id="volunteerSection" class="panel panel-default">
 					<div class="panel-heading">
 						<h3>Registration</h3>
 					</div>
@@ -685,7 +690,7 @@ class TEOVolunteerFormView extends NaviView {
 			`);
 
 			if (model.get('vAppStatus') == 'Approved' && model.get('vStatus') == 'Active') {
-				$('#' + _this.className + '_dt').after('<p><button type="button" class="btn btn-default btn-register">Register</button> <button type="button" class="btn btn-default btn-export-excel" style="margin: 0;">Export Excel</button></p>');
+				$('#' + _this.className + '_dt').after('<p><button type="button" class="btn btn-primary btn-register">Register</button> <button type="button" class="btn btn-primary btn-export-excel" style="margin: 0;">Export Excel</button></p>');
 				$('.btn-register', _this.$topRegion).on('click', function(e) {
 					e.preventDefault();
 					_this.navi.openView(_this.initOptions.registrationForm, {
@@ -727,24 +732,22 @@ class TEOVolunteerFormView extends NaviView {
 			// _this.form.setModel(model);
 
 			// DATATABLE
-			const bridge = new DataTablesODataBridge();
-			_this.dt = $('#' + _this.className + '_dt').DataTable({
-				dom: '<\'row\'<\'col-sm-6\'l><\'col-sm-6\'f>>' + '<\'row\'<\'col-sm-12\'tr>>' + '<\'row\'<\'col-sm-5\'i><\'col-sm-7\'p>>B',
-				buttons: [
-					'copy', 'csv', 'excel', 'pdf', 'print'
-				],
+			// const bridge = new DataTablesODataBridge();
+			const $table = $('#' + _this.className + '_dt');
+			$table.oDataTable({
+				$filter: `MainID eq '${model.get('MainID')}'`,
+				ajax: {
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					},
+					url: baseEntityUrl + '/Registration',
+				},
 				columns: [
-					// {
-					// 	data: 'id',
-					// 	checkboxes: {
-					// 		'selectRow': true
-					// 	},
-					// 	orderable: false
-					// },
 					{
 						data: 'eDate',
 						title: 'Event Date',
-						default: ''
+						default: '',
+						searchType: 'date'
 					}, {
 						data: 'rEName',
 						title: 'Event Name',
@@ -752,7 +755,8 @@ class TEOVolunteerFormView extends NaviView {
 					}, {
 						data: 'rEType',
 						title: 'Event Type',
-						default: ''
+						default: '',
+						searchChoices: ['', 'Training', 'Outreach', 'Special Event']
 					}, {
 
 						data: 'vLName',
@@ -772,27 +776,20 @@ class TEOVolunteerFormView extends NaviView {
 						default: '',
 						visible: false
 					}, {
+						class: 'action',
 						data: 'id',
 						title: 'Action',
 						render: function() {
 							return '<button type="button" class="btn btn-default">View</button>'
-						}
+						},
+						orderable: false,
+						searchable: false
 					}
 				],
-				// order: [
-				// 	[2, "asc"]
-				// ],
-				// 'select': {
-				// 	'style': 'multi'
-				// },
-				"serverSide": true,
-				scrollX: true,
-				ajax: {
-					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and MainID eq \'' + model.get('MainID') + '\'',
-					data: bridge.data(),
-					dataFilter: bridge.dataFilter()
-				}
+				dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+				lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
 			});
+			_this.dt = $table.DataTable();
 			$('#' + _this.className + '_dt tbody').on('click', function(e) {
 				if ($(e.target).is('.btn')) {
 					e.preventDefault();
@@ -856,33 +853,38 @@ class TEOVolunteerFormView extends NaviView {
 		}
 	}
 
-	action_delete(model) {
-		$(':input').prop('disabled', true);
+	action_delete() { // model) {
+		bootbox.prompt('You are about to delete a volunteer. Please type the word \'Delete\' to confirm.', function(result){
+			if (result === 'Delete') {
+				$(':input').prop('disabled', true);
 
-		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + this.id + '\')';
-		const data = $.extend({}, model.toJSON());
-		data.__Status = 'DEL';
+				const _this = this;
+				const url = baseEntityUrl + '/Volunteer(\'' + this.id + '\')';
+				// const data = $.extend({}, model.toJSON());
+				// data.__Status = 'DEL';
 
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			complete: function() {
-				$(':input').prop('disabled', false);
-			},
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(data),
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
-			},
-			method: 'PATCH', // TODO - use PATCH.
-			success: function success() { // (data, textStatus, jqXHR) {
-				const showOptions = {
-					operation: 'reload',
-				};
-				_this.navi.openView(_this.returnView, showOptions);
+				$.ajax(url, {
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					},
+					complete: function() {
+						$(':input').prop('disabled', false);
+					},
+					contentType: 'application/json; charset=utf-8',
+					// data: JSON.stringify(data),
+					dataType: 'JSON',
+					error: function error(jqXHR, textStatus, errorThrown) {
+						alert('An error has occured. ', errorThrown);
+					},
+					// method: 'PATCH', // TODO - use PATCH.
+					method: 'DELETE',
+					success: function success() { // (data, textStatus, jqXHR) {
+						const showOptions = {
+							operation: 'reload',
+						};
+						_this.navi.openView(_this.returnView, showOptions);
+					}
+				});
 			}
 		});
 	}
@@ -922,7 +924,7 @@ class TEOVolunteerFormView extends NaviView {
 	putRecord(json) {
 		$(':input').prop('disabled', true);
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + this.id + '\')';
+		const url = baseEntityUrl + '/Volunteer(\'' + this.id + '\')';
 
 		json = {
 			MainID: json.MainID || this.id,
@@ -980,7 +982,7 @@ class TEOVolunteerFormView extends NaviView {
 	postRecord(json) {
 		$(':input').prop('disabled', true);
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer';
+		const url = baseEntityUrl + '/Volunteer';
 
 		json = {
 			MainID: json.MainID,
@@ -1043,7 +1045,7 @@ class TEOVolunteerFormView extends NaviView {
 
 	getRecord(id, callback) {
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + id + '\')';
+		const url = baseEntityUrl + '/Volunteer(\'' + id + '\')';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid

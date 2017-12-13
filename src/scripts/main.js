@@ -1,4 +1,13 @@
+/* exported baseConfigUrl baseEntityUrl baseUploadUrl baseURL baseUploadSubmitUrl */
 /* global NaviBar CotLoginExt */
+
+const baseURL = 'https://was-intra-sit.toronto.ca'
+const baseEntityUrl = baseURL + '/c3api_data/v2/DataAccess.svc/TEOVolunteer';
+const baseConfigUrl = baseURL + '/c3api_config/v2/ConfigService.svc/ConfigSet';
+const baseUploadUrl = baseURL + '/cc_sr_admin_v1/upload/jngo2';
+const baseUploadSubmitUrl = baseURL + '/cc_sr_admin_v1/upload/jngo2/jngo2';
+
+$.fn.oDataTable.headerWrapperString = '<div style="margin-right: -15px;"></div>';
 
 let cotApp;
 let cotLogin;
@@ -6,14 +15,14 @@ let navi;
 
 $(document).ready(function() {
 
-	cotApp = new cot_app('doadmin');
+	cotApp = new cot_app('Live Green Volunteer Admin');
 	cotApp.render(function() {
 
-		cotApp.setTitle('Live Green Volunteer Admin');
+		//	cotApp.setTitle('Live Green Volunteer Admin');
 
 		// cotLogin = new cot_login({
 		cotLogin = new CotLoginExt({
-			appName: 'c3app',
+			appName: 'lgv',
 			ccRoot: 'https://insideto-secure.toronto.ca',
 			welcomeSelector: null,
 			onReady: function() { // (cot_login_instance) {
@@ -28,7 +37,7 @@ $(document).ready(function() {
 						classObject: null,
 						className: 'TEODashView',
 						classUrl: 'scripts/naviview.teodashview.js',
-						initOptions:  {
+						initOptions: {
 							formView: 'volunteerFormView'
 						}
 					},

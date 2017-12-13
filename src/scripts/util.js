@@ -1,7 +1,6 @@
 /* exported CotForm2 CotLoginExt DataTablesODataBridge */
 /* global CotForm CotDropzone CotSession */
 cot_form.prototype.dropzoneFieldRender = function(originalfield) {
-	// console.log('DROPZONE FIELD RENDER', field);
 	var field = $.extend(true, {}, originalfield);
   // Main element.
   var $el = $('<div></div>');
@@ -25,7 +24,6 @@ cot_form.prototype.dropzoneFieldRender = function(originalfield) {
 
   // Dropzone.
   var cotDropzone = $hiddenInput.get(0).cotDropzone = new CotDropzone();
-  // console.log('NEW COT DROPZONE', cotDropzone);
   // Fill from model.
   cotDropzone._fillFromModel = function(model) {
     if (field.bindTo) {
@@ -148,12 +146,9 @@ cot_form.prototype.dropzoneFieldRender = function(originalfield) {
   if (field.options.includeCotFormInit != false) {
     field.options.init = (function(oldInit) {
       return function() {
-				// console.log('DROP ZONE INIT', this);
-				// console.log('OLD INIT', oldInit);
         if (oldInit) {
           oldInit.apply(this, arguments);
         }
-				// console.log('THIS', this);
         this.on('success', function() { //file) {
           cotDropzone._updateHiddenIntput();
         });
@@ -170,7 +165,6 @@ cot_form.prototype.dropzoneFieldRender = function(originalfield) {
 
   // Render dropzone.
   cotDropzone.render(field.options);
-	console.log('DROP ZONE RENDER', field.options);
 
   // Return wrapper element.
   return $el.get(0);
@@ -216,17 +210,13 @@ function CotForm2(definition) {
 CotForm2.prototype = Object.create(CotForm.prototype);
 CotForm2.prototype.constructor = CotForm2;
 CotForm2.prototype._fillFromModel = function(model) {
-	console.log('FILLFROMMODEL', model);
 	if (this._isRendered) {
-		console.log('_ISRENDERED', this._isRendered);
 		(this._definition['sections'] || []).forEach(function(sectionInfo) {
 			(sectionInfo['rows'] || []).forEach(function(row) {
 				(row['fields'] || []).forEach(function(field) {
-					console.log('BINDTO', field['bindTo']);
 					//TODO: support grids
 					if (field['bindTo']) {
 						var value = model ? (model.get(field['bindTo']) || '') : '';
-						console.log('VALUE', value);
 						switch (field['type']) {
 							case 'radio':
 							case 'checkbox':
@@ -241,7 +231,6 @@ CotForm2.prototype._fillFromModel = function(model) {
 								$('#' + field['id']).multiselect('select', $.makeArray(value));
 								break;
 							case 'datetimepicker':
-							console.log('TEST WITH VAL');
 								// $(".datetimepicker." + field['id']).val(value).trigger('change');
 								$(".datetimepicker." + field['id']).data("DateTimePicker").date(value);
 								break;
