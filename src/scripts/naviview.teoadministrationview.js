@@ -128,10 +128,10 @@ class TEOAdministrationView extends NaviView {
 		const data = {
 			ConfigContent: btoa(JSON.stringify(this.model.toJSON())),
 			ContentType: "application/json",
-			QualifiedName: "TEOVolunteer/administration.json"
+			QualifiedName: "live_green_volunteer/administration.json"
 		};
 		const _this = this;
-		const url = baseConfigUrl + '(\'TEOVolunteer/administration.json\')';
+		const url = baseConfigUrl + '(\'live_green_volunteer/administration.json\')';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -143,11 +143,11 @@ class TEOAdministrationView extends NaviView {
 			data: JSON.stringify(data),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'PUT',
 			success: function success() { // data, textStatus, jqXHR) {
-				alert('Configuration Saved');
+				bootbox.alert('Configuration Saved');
 			}
 		});
 	}
@@ -162,7 +162,7 @@ class TEOAdministrationView extends NaviView {
 			contentType: 'application/json; charset=utf-8',
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'GET',
 			success: function success(data) { // , textStatus, jqXHR) {
