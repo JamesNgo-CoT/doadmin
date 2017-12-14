@@ -1,5 +1,5 @@
 /* exported TEOEventFormView */
-/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl */
+/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl baseUploadKeepUrl */
 
 class TEOEventFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -415,7 +415,7 @@ class TEOEventFormView extends NaviView {
 
 			$('.btn-delete', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
-				_this.action_delete(_this.id , _this.returnView);
+				_this.action_delete(_this.id, _this.returnView);
 			});
 
 			$('.btn-register', _this.$topRegion).on('click', function(e) {
@@ -566,64 +566,71 @@ class TEOEventFormView extends NaviView {
 		const url = baseEntityUrl + '/Event(\'' + this.id + '\')';
 
 		let data = model.toJSON();
-		if (data.eAttachments) {
-			data.eAttachments = data.eAttachments.map((file) => {
-				var bin_id;
-				if (file.bin_id) {
-					bin_id = file.bin_id;
-				} else {
-					try {
-						bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
-					} catch (e) {
-						bin_id = null;
+		new Promise((resolve) => {
+			if (data.eAttachments) {
+				data.eAttachments = data.eAttachments.map((file) => {
+					var bin_id;
+					if (file.bin_id) {
+						bin_id = file.bin_id;
+					} else {
+						try {
+							bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+						} catch (e) {
+							bin_id = null;
+						}
 					}
-				}
-				return {
-					bin_id: bin_id,
-					name: file.name,
-					size: file.size,
-					status: file.status,
-					type: file.type
+					return {
+						bin_id: bin_id,
+						name: file.name,
+						size: file.size,
+						status: file.status,
+						type: file.type
+					}
+				});
+				this.keepFiles(data.eAttachments, () => {
+					resolve();
+				});
+			} else {
+				resolve();
+			}
+		}).then(() => {
+			data = {
+				eContEmail: data.eContEmail,
+				eContName: data.eContName,
+				eContPhone: data.eContPhone,
+				eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+				eHours: data.eHours,
+				eKey: data.eKey || this.id,
+				eLocation: data.eLocation,
+				eName: data.eName,
+				eNotes: data.eNotes,
+				eSpeakerInfo: data.eSpeakerInfo,
+				eSpeakerName: data.eSpeakerName,
+				eState: data.eState,
+				eTimeEnd: data.eTimeEnd,
+				eTimeStart: data.eTimeStart,
+				eTypeOf: data.eTypeOf,
+				eAttachments: data.eAttachments
+			}
+
+			$.ajax(url, {
+				headers: {
+					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+				},
+				complete: function() {
+					$(':input').prop('disabled', false);
+				},
+				contentType: 'application/json; charset=utf-8',
+				data: JSON.stringify(data),
+				dataType: 'JSON',
+				error: function error(jqXHR, textStatus, errorThrown) {
+					bootbox.alert('An error has occured. ', errorThrown);
+				},
+				method: 'PUT',
+				success: function success() { // (data, textStatus, jqXHR) {
+					bootbox.alert('Event Updated');
 				}
 			});
-		}
-
-		data = {
-			eContEmail: data.eContEmail,
-			eContName: data.eContName,
-			eContPhone: data.eContPhone,
-			eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
-			eHours: data.eHours,
-			eKey: data.eKey || this.id,
-			eLocation: data.eLocation,
-			eName: data.eName,
-			eNotes: data.eNotes,
-			eSpeakerInfo: data.eSpeakerInfo,
-			eSpeakerName: data.eSpeakerName,
-			eState: data.eState,
-			eTimeEnd: data.eTimeEnd,
-			eTimeStart: data.eTimeStart,
-			eTypeOf: data.eTypeOf,
-			eAttachments: data.eAttachments
-		}
-
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			complete: function() {
-				$(':input').prop('disabled', false);
-			},
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(data),
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				bootbox.alert('An error has occured. ', errorThrown);
-			},
-			method: 'PUT',
-			success: function success() { // (data, textStatus, jqXHR) {
-				bootbox.alert('Event Updated');
-			}
 		});
 	}
 
@@ -633,70 +640,77 @@ class TEOEventFormView extends NaviView {
 		const url = baseEntityUrl + '/Event';
 
 		let data = model.toJSON();
-		if (data.eAttachments) {
-			data.eAttachments = data.eAttachments.map((file) => {
-				var bin_id;
-				if (file.bin_id) {
-					bin_id = file.bin_id;
-				} else {
-					try {
-						bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
-					} catch (e) {
-						bin_id = null;
+		new Promise((resolve) => {
+			if (data.eAttachments) {
+				data.eAttachments = data.eAttachments.map((file) => {
+					var bin_id;
+					if (file.bin_id) {
+						bin_id = file.bin_id;
+					} else {
+						try {
+							bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+						} catch (e) {
+							bin_id = null;
+						}
 					}
-				}
-				return {
-					bin_id: bin_id,
-					name: file.name,
-					size: file.size,
-					status: file.status,
-					type: file.type
+					return {
+						bin_id: bin_id,
+						name: file.name,
+						size: file.size,
+						status: file.status,
+						type: file.type
+					}
+				});
+				this.keepFiles(data.eAttachments, () => {
+					resolve();
+				});
+			} else {
+				resolve();
+			}
+		}).then(() => {
+			data = {
+				eContEmail: data.eContEmail,
+				eContName: data.eContName,
+				eContPhone: data.eContPhone,
+				eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+				eHours: data.eHours,
+				eKey: data.eKey || this.id,
+				eLocation: data.eLocation,
+				eName: data.eName,
+				eNotes: data.eNotes,
+				eSpeakerInfo: data.eSpeakerInfo,
+				eSpeakerName: data.eSpeakerName,
+				eState: data.eState,
+				eTimeEnd: data.eTimeEnd,
+				eTimeStart: data.eTimeStart,
+				eTypeOf: data.eTypeOf,
+				eAttachments: data.eAttachments
+			};
+
+			$.ajax(url, {
+				headers: {
+					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+				},
+				complete: function() {
+					$(':input').prop('disabled', false);
+				},
+				contentType: 'application/json; charset=utf-8',
+				data: JSON.stringify(data),
+				dataType: 'JSON',
+				error: function error(jqXHR, textStatus, errorThrown) {
+					bootbox.alert('An error has occured. ', errorThrown);
+				},
+				method: 'POST',
+				success: function success(data) { // , textStatus, jqXHR) {
+					_this.show({
+						operation: 'update',
+						data: data,
+						returnView: _this.returnView
+					});
+					_this.navi.render();
+					bootbox.alert('Event Added');
 				}
 			});
-		}
-
-		data = {
-			eContEmail: data.eContEmail,
-			eContName: data.eContName,
-			eContPhone: data.eContPhone,
-			eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
-			eHours: data.eHours,
-			eKey: data.eKey || this.id,
-			eLocation: data.eLocation,
-			eName: data.eName,
-			eNotes: data.eNotes,
-			eSpeakerInfo: data.eSpeakerInfo,
-			eSpeakerName: data.eSpeakerName,
-			eState: data.eState,
-			eTimeEnd: data.eTimeEnd,
-			eTimeStart: data.eTimeStart,
-			eTypeOf: data.eTypeOf,
-			eAttachments: data.eAttachments
-		}
-
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			complete: function() {
-				$(':input').prop('disabled', false);
-			},
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(data),
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				bootbox.alert('An error has occured. ', errorThrown);
-			},
-			method: 'POST',
-			success: function success(data) { // , textStatus, jqXHR) {
-				_this.show({
-					operation: 'update',
-					data: data,
-					returnView: _this.returnView
-				});
-				_this.navi.render();
-				bootbox.alert('Event Added');
-			}
 		});
 	}
 
@@ -743,6 +757,20 @@ class TEOEventFormView extends NaviView {
 						this.navi.closeView(this);
 					}
 				});
+			}
+		});
+	}
+
+	keepFiles(attachments, cbk) {
+		const url = baseUploadKeepUrl + attachments.map((attachment) => attachment.bin_id).join(',');
+		$.ajax(url, {
+			data: JSON.stringify({}),
+			error: (jqXHR, textStatus, errorThrown) => {
+				bootbox.alert(`An error has occured. ${errorThrown}`);
+			},
+			method: 'GET',
+			success: () => {
+				cbk();
 			}
 		});
 	}

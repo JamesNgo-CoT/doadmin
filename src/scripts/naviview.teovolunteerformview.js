@@ -1,5 +1,5 @@
 /* exported TEOVolunteerFormView */
-/* global baseEntityUrl baseUploadSubmitUrl baseUploadUrl CotForm2 moment Mustache NaviView */
+/* global baseEntityUrl baseUploadSubmitUrl baseUploadUrl CotForm2 moment Mustache NaviView baseUploadKeepUrl */
 
 class TEOVolunteerFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -837,33 +837,41 @@ class TEOVolunteerFormView extends NaviView {
 
 	submit(model) {
 		$('#' + this.className + 'vAttachments').get(0).cotDropzone.finalize(() => { // data) {
-			var json = model.toJSON();
-			if (json.vAttachments) {
-				json.vAttachments = json.vAttachments.map((file) => {
-					var bin_id;
-					if (file.bin_id) {
-						bin_id = file.bin_id;
-					} else {
-						try {
-							bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
-						} catch (e) {
-							bin_id = null;
+			let json = model.toJSON();
+			new Promise((resolve) => {
+				if (json.vAttachments) {
+					json.vAttachments = json.vAttachments.map((file) => {
+						var bin_id;
+						if (file.bin_id) {
+							bin_id = file.bin_id;
+						} else {
+							try {
+								bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+							} catch (e) {
+								bin_id = null;
+							}
 						}
-					}
-					return {
-						bin_id: bin_id,
-						name: file.name,
-						size: file.size,
-						status: file.status,
-						type: file.type
-					}
-				});
-			}
-			if (this.id) {
-				this.putRecord(json);
-			} else {
-				this.postRecord(json);
-			}
+						return {
+							bin_id: bin_id,
+							name: file.name,
+							size: file.size,
+							status: file.status,
+							type: file.type
+						}
+					});
+					this.keepFiles(json.vAttachments, () => {
+						resolve();
+					});
+				} else {
+					resolve();
+				}
+			}).then(() => {
+				if (this.id) {
+					this.putRecord(json);
+				} else {
+					this.postRecord(json);
+				}
+			});
 		});
 	}
 
@@ -1012,4 +1020,18 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	updateRelatedRecord() {}
+
+	keepFiles(attachments, cbk) {
+		const url = baseUploadKeepUrl + attachments.map((attachment) => attachment.bin_id).join(',');
+		$.ajax(url, {
+			data: JSON.stringify({}),
+			error: (jqXHR, textStatus, errorThrown) => {
+				bootbox.alert(`An error has occured. ${errorThrown}`);
+			},
+			method: 'GET',
+			success: () => {
+				cbk();
+			}
+		});
+	}
 }
