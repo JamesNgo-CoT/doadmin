@@ -1,5 +1,5 @@
 /* exported TEOVolunteerFormView */
-/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadUrl baseUploadSubmitUrl */
+/* global baseEntityUrl baseUploadSubmitUrl baseUploadUrl CotForm2 moment Mustache NaviView */
 
 class TEOVolunteerFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -8,247 +8,186 @@ class TEOVolunteerFormView extends NaviView {
 		this.title = 'Volunteers';
 		this.search = null
 		this.actionMenuItems = null;
-		// this.contextualMenuItems = [
-		// 	{
-		// 		label: 'Menu 1',
-		// 		action: function() {},
-		// 		menuItems: null
-		// 	},
-		// 	{
-		// 		label: 'Menu 2',
-		// 		menuItems: [{
-		// 			label: 'Menu 2.1',
-		// 			action: function() {}
-		// 		}, {
-		// 			label: 'Menu 2.2',
-		// 			action: function() {}
-		// 		}, {
-		// 			label: 'Menu 2.3',
-		// 			action: function() {}
-		// 		}, {
-		// 			label: 'Menu 2.3',
-		// 			menuItems: [{
-		// 				label: 'Menu 2.3.3',
-		// 				action: function() {}
-		// 			}]
-		// 		}],
-		// 		action: null
-		// 	}
-		// ]
 		this.initOptions = initOptions;
 
-		const _this = this;
+		const languages = [
+			'Arabic',
+			'Assyrian',
+			'Cambodian',
+			'Cantonese',
+			'Croatian',
+			'Czech',
+			'Farsi',
+			'French',
+			'German',
+			'Greek',
+			'Gujarati',
+			'Hebrew',
+			'Hindi',
+			'Hungarian',
+			'Italian',
+			'Japanese',
+			'Konkani',
+			'Korean',
+			'Lithuanian',
+			'Mandarin',
+			'Marathi',
+			'Norwegian',
+			'Polish',
+			'Portugese',
+			'Romanian',
+			'Russian',
+			'Serbian',
+			'Sindhi',
+			'Spanish',
+			'Swedish',
+			'Tagalog',
+			'Taiwanese',
+			'Thai',
+			'Turkish',
+			'Vietnames',
+			'Other'
+		];
+
 		this.formDef = {
-			id: this.className + '_vForm',
+			id: `${this.className}_vForm`,
 			rootPath: '',
-			success: function(e) {
+			success: (e) => {
 				e.preventDefault();
-				_this.submit();
+				this.submit();
 				return false;
 			},
 			useBinding: true,
 
 			sections: [{
-				title: 'Volunteer Details',
 				className: 'panel-default',
+				title: 'Volunteer Details',
 
 				rows: [{
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vFName',
-						title: 'First Name',
-						type: 'text',
+						bindTo: 'vFName',
+						id: `${this.className}_vFName`,
 						required: true,
-						bindTo: 'vFName'
+						title: 'First Name',
+						type: 'text'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vLName',
-						title: 'Last Name',
-						type: 'text',
+						bindTo: 'vLName',
+						id: `${this.className}_vLName`,
 						required: true,
-						bindTo: 'vLName'
+						title: 'Last Name',
+						type: 'text'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vAddress',
+						bindTo: 'vAddress',
+						className: 'col-xs-12 col-md-6',
+						id: `${this.className}_vAddress`,
 						title: 'Street Address',
-						type: 'text',
-						bindTo: 'vAddress'
-						//}]
+						type: 'text'
+						// }]
 					}, {
-						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vCity',
+						// fields: [{
+						bindTo: 'vCity',
+						className: 'col-xs-12 col-md-3',
+						id: `${this.className}_vCity`,
 						title: 'City',
-						type: 'text',
-						bindTo: 'vCity'
+						type: 'text'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vPCode',
+						bindTo: 'vPCode',
+						className: 'col-xs-12 col-md-3',
+						id: `${this.className}_vPCode`,
 						title: 'Postal Code',
-						type: 'text',
-						bindTo: 'vPCode'
-						//}]
-					}, {
-						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vPhoneDay',
+						type: 'text'
+					}]
+				}, {
+					fields: [{
+						bindTo: 'vPhoneDay',
+						id: `${this.className}_vPhoneDay`,
+						placeholder: '(416) 555-5555',
 						title: 'Day Phone',
-						validationtype: 'Phone',
-						bindTo: 'vPhoneDay'
+						validationtype: 'Phone'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vPhoneEve',
+						bindTo: 'vPhoneEve',
+						id: `${this.className}_vPhoneEve`,
+						placeholder: '(416) 555-5555',
 						title: 'Evening Phone',
-						validationtype: 'Phone',
-						bindTo: 'vPhoneEve'
-						//}]
-					}, {
-						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vPhoneCell',
+						validationtype: 'Phone'
+					}]
+				}, {
+					fields: [{
+						bindTo: 'vPhoneCell',
+						id: `${this.className}_vPhoneCell`,
+						placeholder: '(416) 555-5555',
 						title: 'Cell Phone',
 						type: 'text',
-						validationtype: 'Phone',
-						bindTo: 'vPhoneCell'
-					}]
-				}, {
-					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vEmail',
+						validationtype: 'Phone'
+						// }]
+					}, {
+						// fields: [{
+						bindTo: 'vEmail',
+						id: `${this.className}_vEmail`,
+						placeholder: 'example@domain.ca',
 						title: 'Email Address',
 						type: 'text',
-						validationType: 'Email',
-						bindTo: 'vEmail'
+						validationType: 'Email'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vAge',
-						title: 'Over 14?',
-						type: 'radio',
-						orientation: 'horizontal',
+						bindTo: 'vAge',
 						choices: [{
 							text: 'Yes'
 						}, {
 							text: 'No'
 						}],
-						bindTo: 'vAge'
+						className: 'col-xs-12 col-sm-6 col-md-3',
+						id: `${this.className}_vAge`,
+						orientation: 'horizontal',
+						title: 'Over 14?',
+						type: 'radio'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vToronto',
-						title: 'Live in Toronto',
-						type: 'radio',
-						orientation: 'horizontal',
+						bindTo: 'vToronto',
 						choices: [{
 							text: 'Yes'
 						}, {
 							text: 'No'
 						}],
-						bindTo: 'vToronto'
+						className: 'col-xs-12 col-sm-6 col-md-3',
+						id: `${this.className}_vToronto`,
+						orientation: 'horizontal',
+						title: 'Live in Toronto',
+						type: 'radio'
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_vLang',
+						bindTo: 'vLang',
+						choices: languages.map((lang) => {
+							return {
+								text: lang
+							};
+						}),
+						id: `${this.className}_vLang`,
+						orientation: 'horizontal',
 						title: 'Languages Spoken',
-						type: 'checkbox',
-						orientation: 'horizontal',
-						choices: [{
-							text: 'Arabic'
-						}, {
-							text: 'Assyrian'
-						}, {
-							text: 'Cambodian'
-						}, {
-							text: 'Cantonese'
-						}, {
-							text: 'Croatian'
-						}, {
-							text: 'Czech'
-						}, {
-							text: 'Farsi'
-						}, {
-							text: 'French'
-						}, {
-							text: 'German'
-						}, {
-							text: 'Greek'
-						}, {
-							text: 'Gujarati'
-						}, {
-							text: 'Hebrew'
-						}, {
-							text: 'Hindi'
-						}, {
-							text: 'Hungarian'
-						}, {
-							text: 'Italian'
-						}, {
-							text: 'Japanese'
-						}, {
-							text: 'Konkani'
-						}, {
-							text: 'Korean'
-						}, {
-							text: 'Lithuanian'
-						}, {
-							text: 'Mandarin'
-						}, {
-							text: 'Marathi'
-						}, {
-							text: 'Norwegian'
-						}, {
-							text: 'Polish'
-						}, {
-							text: 'Portugese'
-						}, {
-							text: 'Romanian'
-						}, {
-							text: 'Russian'
-						}, {
-							text: 'Serbian'
-						}, {
-							text: 'Sindhi'
-						}, {
-							text: 'Spanish'
-						}, {
-							text: 'Swedish'
-						}, {
-							text: 'Tagalog'
-						}, {
-							text: 'Taiwanese'
-						}, {
-							text: 'Thai'
-						}, {
-							text: 'Turkish'
-						}, {
-							text: 'Vietnames'
-						}, {
-							text: 'Other'
-						}],
-						bindTo: 'vLang'
+						type: 'checkbox'
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_vLanguageOther',
+						bindTo: 'vLanguageOther',
+						id: `${this.className}_vLanguageOther`,
 						title: 'Other Languages',
-						bindTo: 'vLanguageOther'
+						type: 'text'
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_vSource',
-						title: 'Details',
-						type: 'checkbox',
-						orientation: 'horizontal',
+						bindTo: 'vSource',
 						choices: [{
 							text: 'Internet'
 						}, {
@@ -266,127 +205,130 @@ class TEOVolunteerFormView extends NaviView {
 						}, {
 							text: 'Other'
 						}],
-						bindTo: 'vSource'
+						id: `${this.className}_vSource`,
+						orientation: 'horizontal',
+						title: 'Details',
+						type: 'checkbox'
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_vSourceOther',
-						title: 'Other Details',
-						bindTo: 'vSourceOther'
+						bindTo: 'vSourceOther',
+						id: `${this.className}_vSourceOther`,
+						title: 'Other Details'
 					}]
 				}]
 			}, {
-				title: 'Administration Details',
 				className: 'panel-default ',
+				title: 'Administration Details',
 
 				rows: [{
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vEmergName',
+						bindTo: 'vEmergName',
+						id: `${this.className}_vEmergName`,
 						title: 'Emergency Contact Name',
-						type: 'text',
-						bindTo: 'vEmergName'
+						type: 'text'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vEmergRel',
+						bindTo: 'vEmergRel',
+						id: `${this.className}_vEmergRel`,
 						title: 'Emergency Contact Relationship',
-						type: 'text',
-						bindTo: 'vEmergRel'
+						type: 'text'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vEmergPhone',
+						bindTo: 'vEmergPhone',
+						id: `${this.className}_vEmergPhone`,
+						placeholder: '(416) 555-5555',
 						title: 'Emergency Contact Phone',
 						type: 'text',
-						validationtype: 'Phone',
-						bindTo: 'vEmergPhone'
+						validationtype: 'Phone'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vEmergPhoneAlt',
+						bindTo: 'vEmergPhoneAlt',
+						id: `${this.className}_vEmergPhoneAlt`,
+						placeholder: '(416) 555-5555',
 						title: 'Emergency Contact Alternative Phone',
 						type: 'text',
-						validationtype: 'Phone',
-						bindTo: 'vEmergPhoneAlt'
+						validationtype: 'Phone'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vDateSubmitted',
-						title: 'Date Submitted',
-						type: 'datetimepicker',
+						bindTo: 'vDateSubmitted',
+						id: `${this.className}_vDateSubmitted`,
 						options: {
 							format: 'MM/DD/YYYY',
 							extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z']
 						},
-						bindTo: 'vDateSubmitted'
+						title: 'Date Submitted',
+						type: 'datetimepicker'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vDateArchived',
+						bindTo: 'vDateArchived',
+						id: `${this.className}_vDateArchived`,
+						options: {
+							format: 'MM/DD/YYYY',
+							extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z']
+						},
 						title: 'Date Archived',
-						type: 'datetimepicker',
-						bindTo: 'vDateArchived'
-						//}]
-					}, {
-						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vDateApproved',
-						title: 'Date Approved',
-						type: 'datetimepicker',
-						bindTo: 'vDateApproved'
+						type: 'datetimepicker'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vGraduate',
-						title: 'Graduate?',
-						type: 'radio',
+						bindTo: 'vDateApproved',
+						className: 'col-xs-12 col-sm-6',
+						id: `${this.className}_vDateApproved`,
+						options: {
+							format: 'MM/DD/YYYY',
+							extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z']
+						},
+						title: 'Date Approved',
+						type: 'datetimepicker'
+					}]
+				}, {
+					fields: [{
+						bindTo: 'vGraduate',
 						choices: [{
-								text: 'No'
-							},
-							{
-								text: 'Yes'
-							}
-						],
+							text: 'No'
+						}, {
+							text: 'Yes'
+						}],
+						id: `${this.className}_vGraduate`,
 						orientation: 'horizontal',
-						bindTo: 'vGraduate'
+						title: 'Graduate?',
+						type: 'radio'
 						//}]
 					}, {
 						//fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vGradDate',
+						bindTo: 'vGradDate',
+						id: `${this.className}_vGradDate`,
+						options: {
+							format: 'MM/DD/YYYY',
+							extraFormats: ['YYYY-MM-DDTHH:mm:SS-Z']
+						},
 						title: 'Graduation Date',
-						type: 'datetimepicker',
-						bindTo: 'vGradDate'
+						type: 'datetimepicker'
 					}]
 
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_vAppStatus',
+						bindTo: 'vAppStatus',
+						choices: [{
+							text: 'New'
+						}, {
+							text: 'Approved'
+						}, {
+							text: 'Archived'
+						}],
+						id: `${this.className}_vAppStatus`,
 						title: 'Application Status',
 						type: 'radio',
-						choices: [{
-								text: 'New'
-							},
-							{
-								text: 'Approved'
-							},
-							{
-								text: 'Archived'
-							}
-						],
-						orientation: 'horizontal',
-						bindTo: 'vAppStatus'
-					}]
-				}, {
-					fields: [{
+						orientation: 'horizontal'
+						//}]
+					}, {
+						//fields: [{
 						id: this.className + '_vAODA',
 						title: 'AODA',
 						type: 'radio',
@@ -402,6 +344,7 @@ class TEOVolunteerFormView extends NaviView {
 					}]
 				}, {
 					fields: [{
+						className: 'col-xs-12 col-md-6',
 						id: this.className + '_vStatus',
 						title: 'Volunteer Status',
 						type: 'radio',
@@ -634,20 +577,31 @@ class TEOVolunteerFormView extends NaviView {
 							previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
 							previewFormDef.sections[i1].rows[i2].fields[i3].value = '-';
 						} else {
-							if (id == 'eAttachments') {
+							if (id == 'vAttachments') {
 								const template = `
-								<ul>
-									{{#values}}
-									<li>
-										{{name}} (<a href="${baseUploadUrl}/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
-									</li>
-									{{/values}}
-								</ul>
+									<ul>
+										{{#values}}
+										<li>
+											{{name}} (<a href="${baseUploadUrl}/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+										</li>
+										{{/values}}
+									</ul>
 								`;
 								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'html';
 								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, {
 									values: value
 								});
+							} else if (previewFormDef.sections[i1].rows[i2].fields[i3].type === 'textarea') {
+								const template = `
+									<span class="staticlabel"><span>{{label}}</span></span>
+									<p>{{{value}}}</p>
+								`;
+								const html = Mustache.render(template, {
+									label: previewFormDef.sections[i1].rows[i2].fields[i3].title,
+									value: value.replace(/(?:\r\n|\r|\n)/g, '<br />')
+								});
+								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'html';
+								previewFormDef.sections[i1].rows[i2].fields[i3].html = html;
 							} else {
 								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
 								previewFormDef.sections[i1].rows[i2].fields[i3].value = value;
@@ -742,55 +696,54 @@ class TEOVolunteerFormView extends NaviView {
 					},
 					url: baseEntityUrl + '/Registration',
 				},
-				columns: [
-					{
-						data: 'eDate',
-						title: 'Event Date',
-						default: '',
-						searchType: 'date'
-					}, {
-						data: 'rEName',
-						title: 'Event Name',
-						default: ''
-					}, {
-						data: 'rEType',
-						title: 'Event Type',
-						default: '',
-						searchChoices: ['', 'Training', 'Outreach', 'Special Event']
-					}, {
+				columns: [{
+					data: 'eDate',
+					title: 'Event Date',
+					default: '',
+					render: (data) => moment(data).format('l'),
+					searchType: 'date'
+				}, {
+					data: 'rEName',
+					title: 'Event Name',
+					default: ''
+				}, {
+					data: 'rEType',
+					title: 'Event Type',
+					default: '',
+					searchChoices: ['', 'Training', 'Outreach', 'Special Event']
+				}, {
 
-						data: 'vLName',
-						title: 'Volunteer',
-						default: '',
-						render: function(data, type, row) {
-							return row.vLName + ', ' + row.vFName;
-						}
-					}, {
-						data: 'vLName',
-						title: 'Last Name',
-						default: '',
-						visible: false
-					}, {
-						data: 'vFName',
-						title: 'First Name',
-						default: '',
-						visible: false
-					}, {
-						class: 'action',
-						data: 'id',
-						title: 'Action',
-						render: function() {
-							return '<button type="button" class="btn btn-default">View</button>'
-						},
-						orderable: false,
-						searchable: false
+					data: 'vLName',
+					title: 'Volunteer',
+					default: '',
+					render: function(data, type, row) {
+						return row.vLName + ', ' + row.vFName;
 					}
-				],
+				}, {
+					data: 'vLName',
+					title: 'Last Name',
+					default: '',
+					visible: false
+				}, {
+					data: 'vFName',
+					title: 'First Name',
+					default: '',
+					visible: false
+				}, {
+					class: 'action',
+					data: 'id',
+					title: 'Action',
+					render: function() {
+						return '<button type="button" class="btn btn-primary">View</button>'
+					},
+					orderable: false,
+					searchable: false
+				}],
 				dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
 				lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
 			});
 			_this.dt = $table.DataTable();
-			$('#' + _this.className + '_dt tbody').on('click', function(e) {
+			$('#' + _this.className + '_dt tbody', _this.$topRegion).on('click', function(e) {
 				if ($(e.target).is('.btn')) {
 					e.preventDefault();
 					var data = _this.dt.row($(e.target).closest('tr')).data();
@@ -853,36 +806,29 @@ class TEOVolunteerFormView extends NaviView {
 		}
 	}
 
-	action_delete() { // model) {
-		bootbox.prompt('You are about to delete a volunteer. Please type the word \'Delete\' to confirm.', function(result){
+	action_delete() {
+		bootbox.prompt('You are about to delete a volunteer. Please type the word \'Delete\' to confirm.', (result) => {
 			if (result === 'Delete') {
 				$(':input').prop('disabled', true);
 
-				const _this = this;
-				const url = baseEntityUrl + '/Volunteer(\'' + this.id + '\')';
-				// const data = $.extend({}, model.toJSON());
-				// data.__Status = 'DEL';
-
-				$.ajax(url, {
-					headers: {
-						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-					},
-					complete: function() {
+				$.ajax(`${baseEntityUrl}/Volunteer('${this.id}')`, {
+					complete: () => {
 						$(':input').prop('disabled', false);
 					},
 					contentType: 'application/json; charset=utf-8',
-					// data: JSON.stringify(data),
 					dataType: 'JSON',
-					error: function error(jqXHR, textStatus, errorThrown) {
-						alert('An error has occured. ', errorThrown);
+					error: (jqXHR, textStatus, errorThrown) => {
+						bootbox.alert('An error has occured. ' + errorThrown);
 					},
-					// method: 'PATCH', // TODO - use PATCH.
+					headers: {
+						'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+					},
 					method: 'DELETE',
-					success: function success() { // (data, textStatus, jqXHR) {
-						const showOptions = {
-							operation: 'reload',
-						};
-						_this.navi.openView(_this.returnView, showOptions);
+					success: () => {
+						this.navi.openView(this.returnView, {
+							operation: 'reload'
+						});
+						this.navi.closeView(this);
 					}
 				});
 			}
@@ -957,7 +903,7 @@ class TEOVolunteerFormView extends NaviView {
 			vSourceOther: json.vSourceOther,
 			vStatus: json.vStatus,
 			vToronto: json.vToronto
-		}
+		};
 
 		$.ajax(url, {
 			headers: {
@@ -970,11 +916,11 @@ class TEOVolunteerFormView extends NaviView {
 			data: JSON.stringify(json),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ' + errorThrown);
 			},
 			method: 'PUT',
 			success: function success() { // (data, textStatus, jqXHR) {
-				alert('Volunteer Updated');
+				bootbox.alert('Volunteer Updated');
 			}
 		});
 	}
@@ -985,7 +931,7 @@ class TEOVolunteerFormView extends NaviView {
 		const url = baseEntityUrl + '/Volunteer';
 
 		json = {
-			MainID: json.MainID,
+			MainID: json.MainID || this.id,
 			vAODA: json.vAODA,
 			vAddress: json.vAddress,
 			vAge: json.vAge,
@@ -1015,7 +961,7 @@ class TEOVolunteerFormView extends NaviView {
 			vSourceOther: json.vSourceOther,
 			vStatus: json.vStatus,
 			vToronto: json.vToronto
-		}
+		};
 
 		$.ajax(url, {
 			headers: {
@@ -1028,11 +974,11 @@ class TEOVolunteerFormView extends NaviView {
 			data: JSON.stringify(json),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ' + errorThrown);
 			},
 			method: 'POST',
 			success: function success(data) { // , textStatus, jqXHR) {
-				window.alert('Volunteer Added');
+				bootbox.alert('Volunteer Added');
 				_this.show({
 					operation: 'update',
 					data: data,
@@ -1044,19 +990,19 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	getRecord(id, callback) {
-		const _this = this;
-		const url = baseEntityUrl + '/Volunteer(\'' + id + '\')';
+		const url = `${baseEntityUrl}/Volunteer('${id}')`;
+
 		$.ajax(url, {
 			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+				'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
 			},
 			contentType: 'application/json; charset=utf-8',
 			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+			error: (jqXHR, textStatus, errorThrown) => {
+				bootbox.alert(`An error has occured. ${errorThrown}`);
 			},
 			method: 'GET',
-			success: function success(data) { // , textStatus, jqXHR) {
+			success: (data) => {
 				data.vDateApproved = moment(data.vDateApproved).isValid() ? moment(data.vDateApproved).format('MM/DD/YYYY') : '';
 				data.vDateSubmitted = moment(data.vDateSubmitted).isValid() ? moment(data.vDateSubmitted).format('MM/DD/YYYY') : '';
 				data.vGradDate = moment(data.vGradDate).isValid() ? moment(data.vGradDate).format('MM/DD/YYYY') : '';
@@ -1064,4 +1010,6 @@ class TEOVolunteerFormView extends NaviView {
 			}
 		});
 	}
+
+	updateRelatedRecord() {}
 }

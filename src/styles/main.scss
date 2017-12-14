@@ -67,16 +67,24 @@
 			margin-top: 15px;
 
 			.panel-body {
+				background-color: #fff;
+
 				.row {
 					.form-group {
-						margin-bottom: 15px;
+						margin-bottom: 10px;
 
 						.staticlabel + p {
+							margin-bottom: 0;
 							/* background-color: #eee; */
 							padding: 6px 12px;
 							border: 1px solid rgb(204, 204, 204);
 							border-radius: 4px;
 						}
+					}
+
+					div[id$="vLangElement"] label.checkboxLabel,
+					div[id$="vSourceElement"] label.checkboxLabel {
+						min-width: 115px;
 					}
 				}
 			}

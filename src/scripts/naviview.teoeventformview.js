@@ -1,5 +1,5 @@
 /* exported TEOEventFormView */
-/* global NaviView CotForm2 moment DataTablesODataBridge Mustache */
+/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl */
 
 class TEOEventFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -9,25 +9,28 @@ class TEOEventFormView extends NaviView {
 		this.search = null
 		this.actionMenuItems = null;
 
-		const _this = this;
 		this.formDef = {
-			id: this.className + '_eForm',
+			id: `${this.className}_eForm`,
 			rootPath: '',
-			success: function(e) {
+			success: (e) => {
 				e.preventDefault();
-				_this.action_submit();
+				this.action_submit();
 				return false;
 			},
 			useBinding: true,
+
 			sections: [{
 				title: 'Event Details',
-				className: 'panel-info',
+				className: 'panel-default',
+
 				rows: [{
 					fields: [{
-						id: this.className + '_eTypeOf',
+						className: 'col-xs-12 col-md-4',
+						id: `${this.className}_eTypeOf`,
 						title: 'Type of Event',
-						required: true,
 						type: 'radio',
+						required: true,
+						orientation: 'horizontal',
 						choices: [{
 							text: 'Training'
 						}, {
@@ -35,13 +38,11 @@ class TEOEventFormView extends NaviView {
 						}, {
 							text: 'Special Event'
 						}],
-						orientation: 'horizontal',
 						bindTo: 'eTypeOf'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_eDate',
+						id: `${this.className}_eDate`,
 						title: 'Date',
 						required: true,
 						type: 'datetimepicker',
@@ -49,8 +50,7 @@ class TEOEventFormView extends NaviView {
 						// }]
 					}, {
 						// fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_eTimeStart',
+						id: `${this.className}_eTimeStart`,
 						title: 'Start Time',
 						required: true,
 						type: 'text',
@@ -58,8 +58,7 @@ class TEOEventFormView extends NaviView {
 						// }]
 					}, {
 						// fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_eTimeEnd',
+						id: `${this.className}_eTimeEnd`,
 						title: 'End Time',
 						required: true,
 						type: 'text',
@@ -67,7 +66,7 @@ class TEOEventFormView extends NaviView {
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eName',
+						id: `${this.className}_eName`,
 						title: 'Event Name',
 						required: true,
 						type: 'text',
@@ -75,23 +74,21 @@ class TEOEventFormView extends NaviView {
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eLocation',
+						id: `${this.className}_eLocation`,
 						title: 'Location',
 						type: 'text',
 						bindTo: 'eLocation'
 					}]
 				}, {
 					fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_eContName',
+						id: `${this.className}_eContName`,
 						title: 'Contact Name',
 						type: 'text',
 						bindTo: 'eContName'
 						// }]
 					}, {
 						// fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_eContPhone',
+						id: `${this.className}_eContPhone`,
 						title: 'Contact Phone',
 						type: 'text',
 						validationtype: 'Phone',
@@ -99,8 +96,7 @@ class TEOEventFormView extends NaviView {
 						// }]
 					}, {
 						// fields: [{
-						class: 'col-xs-12 col-md-4',
-						id: this.className + '_eContEmail',
+						id: `${this.className}_eContEmail`,
 						title: 'Contact Email',
 						type: 'text',
 						validationtype: 'Email',
@@ -108,22 +104,21 @@ class TEOEventFormView extends NaviView {
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eSpeakerName',
+						id: `${this.className}_eSpeakerName`,
 						title: 'Speaker',
 						type: 'text',
 						bindTo: 'eSpeakerName'
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eSpeakerInfo',
+						id: `${this.className}_eSpeakerInfo`,
 						title: 'Speaker Info',
 						type: 'textarea',
-						rows: 5,
 						bindTo: 'eSpeakerInfo'
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eHours',
+						id: `${this.className}_eHours`,
 						title: 'Hours Credit',
 						type: 'dropdown',
 						choices: [{
@@ -153,7 +148,7 @@ class TEOEventFormView extends NaviView {
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eState',
+						id: `${this.className}_eState`,
 						title: 'State',
 						type: 'radio',
 						choices: [{
@@ -166,7 +161,7 @@ class TEOEventFormView extends NaviView {
 					}]
 				}, {
 					fields: [{
-						id: this.className + '_eNotes',
+						id: `${this.className}_eNotes`,
 						title: 'Staff Notes',
 						type: 'textarea',
 						rows: 5,
@@ -175,15 +170,15 @@ class TEOEventFormView extends NaviView {
 				}]
 			}, {
 				title: 'Attachments',
-				className: 'panel-info',
+				className: 'panel-default',
 
 				rows: [{
 					fields: [{
 						type: 'dropzone',
-						id: this.className + 'eAttachments',
+						id: `${this.className}eAttachments`,
 						options: {
 							maxFiles: 4,
-							url: 'https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/jngo2'
+							url: baseUploadSubmitUrl
 						},
 						bindTo: 'eAttachments'
 					}]
@@ -198,20 +193,20 @@ class TEOEventFormView extends NaviView {
 		super.render();
 	}
 
-	show_newEvent() { // (showOpts) {
+	show_newEvent() {
 		this.title = 'Add Event';
 
 		this.$topRegion.empty().html(`
 			<p>
-				<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-				<button type="button" class="btn btn-default btn-save" style="margin: 0;">Create</button>
+				<button type="button" class="btn btn-primary btn-cancel">Cancel</button>
+				<button type="button" class="btn btn-success btn-save">Create</button>
 			</p>
 
-			<div class="` + this.className + `_formWrapper"></div>
+			<div class="${this.className}_formWrapper"></div>
 
 			<p>
-				<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-				<button type="button" class="btn btn-default btn-save" style="margin: 0;">Create</button>
+				<button type="button" class="btn btn-primary btn-cancel">Cancel</button>
+				<button type="button" class="btn btn-success btn-save">Create</button>
 			</p>
 		`);
 
@@ -264,15 +259,15 @@ class TEOEventFormView extends NaviView {
 			_this.title = model.get('eName');
 			_this.$topRegion.empty().html(`
 				<p>
-					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-primary btn-done" style="margin: 0;">Done</button>
+					<button type="button" class="btn btn-success btn-save" style="margin: 0;">Save</button>
 				</p>
 
 				<div class="` + _this.className + `_formWrapper"></div>
 
 				<p>
-					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-primary btn-done" style="margin: 0;">Done</button>
+					<button type="button" class="btn btn-success btn-save" style="margin: 0;">Save</button>
 				</p>
 			`);
 
@@ -344,13 +339,15 @@ class TEOEventFormView extends NaviView {
 								<ul>
 									{{#values}}
 									<li>
-										{{name}} (<a href="https://was-intra-sit.toronto.ca/cc_sr_admin_v1/upload/jngo2/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+										{{name}} (<a href="${baseUploadUrl}/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
 									</li>
 									{{/values}}
 								</ul>
 								`;
 								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'html';
-								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, { values: value });
+								previewFormDef.sections[i1].rows[i2].fields[i3].html = Mustache.render(template, {
+									values: value
+								});
 							} else {
 								previewFormDef.sections[i1].rows[i2].fields[i3].type = 'static';
 								previewFormDef.sections[i1].rows[i2].fields[i3].value = value;
@@ -364,19 +361,34 @@ class TEOEventFormView extends NaviView {
 			_this.id = model.get('id');
 			_this.title = model.get('eName');
 			_this.$topRegion.empty().html(`
-				<p><button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button> <button type="button" class="btn btn-default btn-save" style="margin: 0;">Update</button> <button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button></p>
-				<div class="` + _this.className + `_formWrapper"></div>
-				<p><button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button> <button type="button" class="btn btn-default btn-save" style="margin: 0;">Update</button> <button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button></p>
+				<p>
+					<button type="button" class="btn btn-primary btn-close">Close</button>
+					<button type="button" class="btn btn-primary btn-save">Update</button>
+					<button type="button" class="btn btn-danger btn-delete">Delete</button>
+				</p>
 
-				<div id="volunteerSection" class="panel panel-info">
+				<div class="${_this.className}_formWrapper"></div>
+
+				<p>
+					<button type="button" class="btn btn-primary btn-close">Close</button>
+					<button type="button" class="btn btn-primary btn-save">Update</button>
+					<button type="button" class="btn btn-danger btn-delete">Delete</button>
+				</p>
+
+				<div id="volunteerSection" class="panel panel-default">
 					<div class="panel-heading">
 						<h3>Registration</h3>
 					</div>
+
 					<div class="panel-body">
 						<div class="row">
 							<div class="col-xs-12">
-								<table id="` + _this.className + `_dt" style="width: 100%;"></table>
-								<p><button type="button" class="btn btn-default btn-register" style="margin: 0;">Register</button> <button type="button" class="btn btn-default btn-export-excel" style="margin: 0;">Export Excel</button></p>
+								<table id="${_this.className}_dt" style="width: 100%;"></table>
+
+								<p>
+									<button type="button" class="btn btn-primary btn-register">Register</button>
+									<button type="button" class="btn btn-primary btn-export-excel">Export Excel</button>
+								</p>
 							</div>
 						</div>
 					</div>
@@ -390,10 +402,7 @@ class TEOEventFormView extends NaviView {
 				});
 				_this.navi.closeView(_this);
 			});
-			$('.btn-export-excel', _this.$topRegion).on('click', function(e) {
-				e.preventDefault();
-				$('.buttons-excel', _this.$topRegion).trigger('click');
-			});
+
 			$('.btn-save', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
 				_this.show({
@@ -404,46 +413,39 @@ class TEOEventFormView extends NaviView {
 				_this.navi.render();
 			});
 
+			$('.btn-delete', _this.$topRegion).on('click', function(e) {
+				e.preventDefault();
+				_this.action_delete(_this.id , _this.returnView);
+			});
+
+			$('.btn-register', _this.$topRegion).on('click', function(e) {
+				e.preventDefault();
+				_this.navi.openView(_this.initOptions.registrationForm, {
+					returnView: _this,
+					eventData: model.toJSON()
+				}, null, true);
+			})
+
+			$('.btn-export-excel', _this.$topRegion).on('click', function(e) {
+				e.preventDefault();
+				$('.buttons-excel', _this.$topRegion).trigger('click');
+			});
+
 			_this.form = new CotForm2(previewFormDef);
 			_this.form.render('.' + _this.className + '_formWrapper');
 			// _this.form.setModel(model);
 
 			// DATATABLE
-			const bridge = new DataTablesODataBridge();
-			_this.dt = $('#' + _this.className + '_dt').DataTable({
-				dom: '<\'row\'<\'col-sm-6\'l><\'col-sm-6\'f>>' + '<\'row\'<\'col-sm-12\'tr>>' + '<\'row\'<\'col-sm-5\'i><\'col-sm-7\'p>>B',
-				buttons: [
-					'copy', 'csv', 'excel', 'pdf', 'print'
-				],
-				columns: [
-				// {
-				// 	data: 'id',
-				// 	checkboxes: {
-				// 		'selectRow': true
-				// 	},
-				// 	orderable: false
-				// },
-				// {
-				// 	data: 'rEName',
-				// 	title: 'Event Name',
-				// 	default: ''
-				// }, {
-				// 	data: 'rETypeOf',
-				// 	title: 'Event Type',
-				// 	default: ''
-				// }, {
-				// 	data: 'rEDate',
-				// 	title: 'Event Date',
-				// 	default: ''
-				// }, {
-				{
-				// 	data: 'vLName',
-				// 	title: 'Volunteer',
-				// 	default: '',
-				// 	render: function(data, type, row) {
-				// 		return row.vLName + ', ' + row.vFName;
-				// 	}
-				// }, {
+			const $table = $('#' + _this.className + '_dt');
+			$table.oDataTable({
+				$filter: `eKey eq '${model.get('eKey')}'`,
+				ajax: {
+					url: baseEntityUrl + '/Registration',
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					}
+				},
+				columns: [{
 					data: 'vLName',
 					title: 'Last Name',
 					default: ''
@@ -460,30 +462,37 @@ class TEOEventFormView extends NaviView {
 					title: 'Mobile Phone',
 					default: ''
 				}, {
+					className: 'action',
 					data: 'id',
 					title: 'Action',
 					render: function() {
-						return '<button type="button" class="btn btn-default">View</button>'
-					}
+						return '<button type="button" class="btn btn-primary">View</button>'
+					},
+					orderable: false,
+					searchable: false
 				}],
-				// order: [
-				// 	[2, "asc"]
-				// ],
-				// 'select': {
-				// 	'style': 'multi'
-				// },
-				"serverSide": true,
-				ajax: {
-					url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration?$format=application/json&$filter=__Status ne \'DEL\' and eKey eq \'' + model.get('eKey') + '\'',
-					data: bridge.data(),
-					dataFilter: bridge.dataFilter(),
-					headers: {
-						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-					}
-				}
+				dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+				lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
 			});
-			$('#' + _this.className + '_dt tbody').on('click', function(e) {
-				if ($(e.target).is('.btn')) {
+
+			_this.dt = $table.DataTable();
+
+			$('#' + _this.className + '_dt tbody')
+				.on('click', function(e) {
+					if ($(e.target).is('.btn')) {
+						e.preventDefault();
+						var data = _this.dt.row($(e.target).closest('tr')).data();
+						const sourceKey = _this.initOptions.registrationForm;
+						const showOptions = {
+							id: data.id,
+							returnView: _this
+						};
+						const instanceKey = null;
+						const autoInstanceKey = true;
+						_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+					}
+				})
+				.on('dblclick', function(e) {
 					e.preventDefault();
 					var data = _this.dt.row($(e.target).closest('tr')).data();
 					const sourceKey = _this.initOptions.registrationForm;
@@ -494,12 +503,7 @@ class TEOEventFormView extends NaviView {
 					const instanceKey = null;
 					const autoInstanceKey = true;
 					_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
-				}
-			});
-			$('.btn-register', _this.$topRegion).on('click', function(e) {
-				e.preventDefault();
-				_this.navi.openView(_this.initOptions.registrationForm, { returnView: _this, eventData: model.toJSON() }, null, true);
-			})
+				});
 		}
 
 		if (showOpts.data) {
@@ -559,7 +563,7 @@ class TEOEventFormView extends NaviView {
 	action_submitPutRecord(model) {
 		$(':input').prop('disabled', true);
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + this.id + '\')';
+		const url = baseEntityUrl + '/Event(\'' + this.id + '\')';
 
 		let data = model.toJSON();
 		if (data.eAttachments) {
@@ -588,7 +592,7 @@ class TEOEventFormView extends NaviView {
 			eContEmail: data.eContEmail,
 			eContName: data.eContName,
 			eContPhone: data.eContPhone,
-			eDate:  moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+			eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
 			eHours: data.eHours,
 			eKey: data.eKey || this.id,
 			eLocation: data.eLocation,
@@ -614,11 +618,11 @@ class TEOEventFormView extends NaviView {
 			data: JSON.stringify(data),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'PUT',
 			success: function success() { // (data, textStatus, jqXHR) {
-				alert('Event Updated');
+				bootbox.alert('Event Updated');
 			}
 		});
 	}
@@ -626,7 +630,7 @@ class TEOEventFormView extends NaviView {
 	action_submitPostRecord(model) {
 		$(':input').prop('disabled', true);
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event';
+		const url = baseEntityUrl + '/Event';
 
 		let data = model.toJSON();
 		if (data.eAttachments) {
@@ -655,9 +659,9 @@ class TEOEventFormView extends NaviView {
 			eContEmail: data.eContEmail,
 			eContName: data.eContName,
 			eContPhone: data.eContPhone,
-			eDate:  moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+			eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
 			eHours: data.eHours,
-			eKey: data.eKey,
+			eKey: data.eKey || this.id,
 			eLocation: data.eLocation,
 			eName: data.eName,
 			eNotes: data.eNotes,
@@ -681,7 +685,7 @@ class TEOEventFormView extends NaviView {
 			data: JSON.stringify(data),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'POST',
 			success: function success(data) { // , textStatus, jqXHR) {
@@ -691,27 +695,54 @@ class TEOEventFormView extends NaviView {
 					returnView: _this.returnView
 				});
 				_this.navi.render();
-				window.alert('Event Added');
+				bootbox.alert('Event Added');
 			}
 		});
 	}
 
 	getRecord(id, callback) {
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + id + '\')';
+		const url = `${baseEntityUrl}/Event('${id}')`;
 		$.ajax(url, {
+			contentType: 'application/json; charset=utf-8',
+			dataType: 'JSON',
+			error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error has occured. ${errorThrown}`),
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
 			},
-			contentType: 'application/json; charset=utf-8',
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
-			},
 			method: 'GET',
-			success: function success(data) { // , textStatus, jqXHR) {
-				data.eDate = moment(data.eDate).isValid() ? moment(data.eDate).format('MM/DD/YYYY') : '';
+			success: (data) => {
+				data.eDate = moment(data.eDate).isValid() ? moment(data.eDate).format('l') : '';
 				callback(data);
+			}
+		});
+	}
+
+	action_delete(id, returnView) {
+		bootbox.prompt('You are about to delete an event. Please type the word \'Delete\' to confirm.', (result) => {
+			if (result === 'Delete') {
+				$(':input').prop('disabled', true);
+
+				$.ajax(`${baseEntityUrl}/Event('${id}')`, {
+					complete: () => {
+						$(':input').prop('disabled', false);
+					},
+					contentType: 'application/json; charset=utf-8',
+					dataType: 'JSON',
+					error: (jqXHR, textStatus, errorThrown) => {
+						bootbox.alert('An error has occured. ' + errorThrown);
+					},
+					headers: {
+						'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+					},
+					method: 'DELETE',
+					success: () => {
+						this.navi.openView(returnView, {
+							operation: 'reload'
+						});
+						this.navi.closeView(this);
+					}
+				});
 			}
 		});
 	}

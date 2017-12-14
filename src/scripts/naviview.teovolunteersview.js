@@ -149,7 +149,7 @@ class TEOVolunteersView extends NaviView {
 				});
 				this.dt = $table.DataTable();
 
-				$('#' + this.className + '_dataTable tbody')
+				$('#' + this.className + '_dataTable tbody', this.$topRegion)
 					.on('click', (e) => {
 						if ($(e.target).is('.btn')) {
 							e.preventDefault();
@@ -181,11 +181,11 @@ class TEOVolunteersView extends NaviView {
 			}
 		}, true);
 
-		$('.btn-reload').on('click', (e) => {
+		$('.btn-reload', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
 			this.action_reload();
 		});
-		$('.btn-add').on('click', (e) => {
+		$('.btn-add', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
 			this.action_newVolunteer();
 		});

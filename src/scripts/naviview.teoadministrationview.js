@@ -180,7 +180,7 @@ class TEOAdministrationView extends NaviView {
 					useBinding: true,
 					sections: [{
 						title: 'Configuration',
-						className: 'panel-info',
+						className: 'panel-default',
 						rows: []
 					}]
 				};

@@ -1,5 +1,5 @@
 /* exported TEORegistrationFormView */
-/* global NaviView DataTablesODataBridge Mustache moment */
+/* global NaviView Mustache moment baseEntityUrl */
 
 class TEORegistrationFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -19,22 +19,22 @@ class TEORegistrationFormView extends NaviView {
 		const template = `
 			<p>
 				<span class="btns-new">
-					<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-					<button type="button" class="btn btn-default btn-create" style="margin: 0;">Create</button>
+					<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
+					<button type="button" class="btn btn-primary btn-create" style="margin: 0;">Create</button>
 				</span>
 				<span class="btns-update">
-					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
-					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
+					<button type="button" class="btn btn-primary btn-done" style="margin: 0;">Done</button>
+					<button type="button" class="btn btn-primary btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-danger btn-delete" style="margin: 0;">Delete</button>
 				</span>
 				<span class="btns-preview">
-					<button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button>
-					<button type="button" class="btn btn-default btn-update" style="margin: 0;">Update</button>
-					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
+					<button type="button" class="btn btn-primary btn-close" style="margin: 0;">Close</button>
+					<button type="button" class="btn btn-primary btn-update" style="margin: 0;">Update</button>
+					<button type="button" class="btn btn-danger btn-delete" style="margin: 0;">Delete</button>
 				</span>
 			</p>
 
-			<div id="eventSection" class="panel panel-info">
+			<div id="eventSection" class="panel panel-default">
 				<div class="panel-heading">
 					<h3>Event</h3>
 				</div>
@@ -49,14 +49,14 @@ class TEORegistrationFormView extends NaviView {
 
 					<div class="row buttons">
 						<div class="col-xs-12 form-group form-group-vertical" style="margin-bottom: 15px;">
-							<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-							<button type="button" class="btn btn-default btn-change" style="margin: 0;">Change</button>
+							<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
+							<button type="button" class="btn btn-primary btn-change" style="margin: 0;">Change</button>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div id="volunteerSection" class="panel panel-info">
+			<div id="volunteerSection" class="panel panel-default">
 				<div class="panel-heading">
 					<h3>Volunteer</h3>
 				</div>
@@ -71,8 +71,8 @@ class TEORegistrationFormView extends NaviView {
 
 					<div class="row buttons">
 						<div class="col-xs-12 form-group form-group-vertical" style="margin-bottom: 15px;">
-							<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-							<button type="button" class="btn btn-default btn-change" style="margin: 0;">Change</button>
+							<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
+							<button type="button" class="btn btn-primary btn-change" style="margin: 0;">Change</button>
 						</div>
 					</div>
 				</div>
@@ -80,18 +80,18 @@ class TEORegistrationFormView extends NaviView {
 
 			<p>
 				<span class="btns-new">
-					<button type="button" class="btn btn-default btn-cancel" style="margin: 0;">Cancel</button>
-					<button type="button" class="btn btn-default btn-create" style="margin: 0;">Create</button>
+					<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
+					<button type="button" class="btn btn-primary btn-create" style="margin: 0;">Create</button>
 				</span>
 				<span class="btns-update">
-					<button type="button" class="btn btn-default btn-done" style="margin: 0;">Done</button>
-					<button type="button" class="btn btn-default btn-save" style="margin: 0;">Save</button>
-					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
+					<button type="button" class="btn btn-primary btn-done" style="margin: 0;">Done</button>
+					<button type="button" class="btn btn-primary btn-save" style="margin: 0;">Save</button>
+					<button type="button" class="btn btn-danger btn-delete" style="margin: 0;">Delete</button>
 				</span>
 				<span class="btns-preview">
-					<button type="button" class="btn btn-default btn-close" style="margin: 0;">Close</button>
-					<button type="button" class="btn btn-default btn-update" style="margin: 0;">Update</button>
-					<button type="button" class="btn btn-default btn-delete" style="margin: 0;">Delete</button>
+					<button type="button" class="btn btn-primary btn-close" style="margin: 0;">Close</button>
+					<button type="button" class="btn btn-primary btn-update" style="margin: 0;">Update</button>
+					<button type="button" class="btn btn-danger btn-delete" style="margin: 0;">Delete</button>
 				</span>
 			</p>
 		`;
@@ -149,16 +149,36 @@ class TEORegistrationFormView extends NaviView {
 			this.action_changeVolunteer();
 		});
 
-		const eBridge = new DataTablesODataBridge();
-		this.edt = $('#' + this.className + '_edt').DataTable({
+		$('#eventSection .row.buttons .btn-cancel', this.$topRegion).on('click', (e) => {
+			e.preventDefault();
+			this.action_setEvent(this.eventData);
+		});
+
+		$('#volunteerSection .row.buttons .btn-cancel', this.$topRegion).on('click', (e) => {
+			e.preventDefault();
+			this.action_setVolunteer(this.volunteerData);
+		});
+
+		// const eBridge = new DataTablesODataBridge();
+		const $table = $('#' + this.className + '_edt').oDataTable({
+			$filter: `eState eq 'Approved'`,
+			$select: 'eHours,eKey,eLocation',
+			ajax: {
+				url: baseEntityUrl + '/Event',
+				headers: {
+					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+				}
+			},
 			columns: [{
 				data: 'eDate',
 				title: 'Event Date',
 				default: '',
 				render: function(data) {
 					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-				}
+				},
+				searchType: 'date'
 			}, {
+				className: 'noMaxWidth',
 				data: 'eName',
 				title: 'Event Name',
 				default: ''
@@ -167,34 +187,45 @@ class TEORegistrationFormView extends NaviView {
 				title: 'Event Type',
 				default: ''
 			}, {
+				className: 'action',
 				data: 'id',
 				title: 'Action',
 				render: () => {
-					return '<button type="button" class="btn btn-default">Select</button>'
-				}
+					return '<button type="button" class="btn btn-primary">Select</button>'
+				},
+				orderable: false,
+				searchable: false
 			}],
-			lengthMenu: [5, 10, 20],
-			"serverSide": true,
-			scrollX: true,
-			ajax: {
-				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=__Status ne \'DEL\' and eState eq \'Approved\'',
-				data: eBridge.data(),
-				dataFilter: eBridge.dataFilter(),
-				headers: {
-					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
-				}
-			}
+			dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+			lengthMenu: [5, 10, 20]
 		});
-		$('#' + this.className + '_edt tbody').on('click', (e) => {
-			if ($(e.target).is('.btn')) {
+		this.edt = $table.DataTable();
+		$('#' + this.className + '_edt tbody')
+			.on('click', (e) => {
+				if ($(e.target).is('.btn')) {
+					e.preventDefault();
+					const eventData = this.edt.row($(e.target).closest('tr')).data();
+					console.log('SETTING EVENT DATA', eventData);
+					this.action_setEvent(eventData);
+				}
+			})
+			.on('dblclick', (e) => {
 				e.preventDefault();
 				const eventData = this.edt.row($(e.target).closest('tr')).data();
+				console.log('SETTING EVENT DATA', eventData);
 				this.action_setEvent(eventData);
-			}
-		});
+			});
 
-		const vBridge = new DataTablesODataBridge();
-		this.vdt = $('#' + this.className + '_vdt').DataTable({
+		// const vBridge = new DataTablesODataBridge();
+		const $vtable = $('#' + this.className + '_vdt').oDataTable({
+			$filter: `vAppStatus eq 'Approved' and vStatus eq 'Active'`,
+			$select: 'MainID,vEmail,vEmergName,vEmergPhone,vEmergRel,vPhoneCell,vPhoneEve',
+			ajax: {
+				url: `${baseEntityUrl}/Volunteer`,
+				headers: {
+					'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+				}
+			},
 			columns: [{
 				data: 'vLName',
 				title: 'Last Name',
@@ -213,11 +244,12 @@ class TEORegistrationFormView extends NaviView {
 				default: '',
 				render: function(data) {
 					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-				}
-			}, {
-				data: 'vStatus',
-				title: 'Status',
-				default: ''
+				},
+				searchType: 'date'
+			// }, {
+			// 	data: 'vStatus',
+			// 	title: 'Status',
+			// 	default: ''
 			}, {
 				data: 'vEmail',
 				title: 'Email',
@@ -227,51 +259,57 @@ class TEORegistrationFormView extends NaviView {
 				title: 'Languages',
 				default: ''
 			}, {
+				className: 'action',
 				data: 'id',
 				title: 'Action',
 				render: () => {
-					return '<button type="button" class="btn btn-default">Select</button>'
-				}
+					return '<button type="button" class="btn btn-primary">Select</button>'
+				},
+				orderable: false,
+				searchable: false
 			}],
-			serverSide: true,
-			scrollX: true,
-			lengthMenu: [5, 10, 20],
-			ajax: {
-				url: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer?$format=application/json&$filter=__Status ne \'DEL\' and (vAppStatus eq \'Approved\' and vStatus eq \'Active\')',
-				data: vBridge.data(),
-				dataFilter: vBridge.dataFilter(),
-				headers: {
-					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
-				}
-			}
+			dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+			lengthMenu: [5, 10, 20]
 		});
-		$('#' + this.className + '_vdt tbody').on('click', (e) => {
-			if ($(e.target).is('.btn')) {
+		this.vdt = $vtable.DataTable();
+		$('#' + this.className + '_vdt tbody')
+			.on('click', (e) => {
+				if ($(e.target).is('.btn')) {
+					e.preventDefault();
+					var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
+					this.action_setVolunteer(volunteerData);
+				}
+			})
+			.on('dblclick', (e) => {
 				e.preventDefault();
 				var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
 				this.action_setVolunteer(volunteerData);
-			}
-		});
+			});
 	}
 
-	show(showOpts) {
+	show(showOpts = {}) {
 		super.show(showOpts);
+		console.log('SHOW', showOpts);
 
 		this.showOpts = showOpts || {};
 
 		const _this = this;
 
 		function proceedPreview() {
+			console.log('PROCEED PREVIEW');
 			// TODO - PREVIEW
 		}
 
 		function proceedUpdate() {
-			$('.btns-new, .btns-update, .btns-preview, #eventSection .row.datatable, #eventSection .row.buttons, #eventSection .row.buttons .btn-cancel, #eventSection .row.buttons .btn-change, #volunteerSection .row.buttons, #volunteerSection .row.datatable, #volunteerSection .row.buttons .btn-cancel, #volunteerSection .row.buttons .btn-change').hide();
-			$('.btns-update').show();
+			console.log('PROCEED UPDATE');
+			$('.btns-new, .btns-update, .btns-preview, #eventSection .row.datatable, #eventSection .row.buttons, #eventSection .row.buttons .btn-cancel, #eventSection .row.buttons .btn-change, #volunteerSection .row.buttons, #volunteerSection .row.datatable, #volunteerSection .row.buttons .btn-cancel, #volunteerSection .row.buttons .btn-change', _this.$topRegion).hide();
+			$('.btns-update', _this.$topRegion).show();
 
 			// const eventId = _this.data.rEId;
 			const eventId = _this.data.eKey;
+			console.log('EVENTID', eventId);
 			_this.action_getEventData(eventId, function(eventData) {
+				console.log('EVENTDATA', eventData);
 				_this.action_setEvent(eventData);
 			});
 
@@ -324,6 +362,8 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_setEvent(eventData) {
+		console.log('SET EVENT', eventData);
+
 		this.eventData = {
 			// rEId: eventData.id
 			eKey: eventData.eKey
@@ -341,38 +381,38 @@ class TEORegistrationFormView extends NaviView {
 		const template = `
 			<div class="col-xs-12">
 				<div class="row">
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Event Name</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#rEName}}{{rEName}}{{/rEName}}{{^rEName}}-{{/rEName}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#rEName}}{{rEName}}{{/rEName}}{{^rEName}}-{{/rEName}}</p>
 					</div>
 
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Location</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#rELocation}}{{rELocation}}{{/rELocation}}{{^rELocation}}-{{/rELocation}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#rELocation}}{{rELocation}}{{/rELocation}}{{^rELocation}}-{{/rELocation}}</p>
 					</div>
 
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Type</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#rETypeOf}}{{rETypeOf}}{{/rETypeOf}}{{^rETypeOf}}-{{/rETypeOf}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#rETypeOf}}{{rETypeOf}}{{/rETypeOf}}{{^rETypeOf}}-{{/rETypeOf}}</p>
 					</div>
 				</div>
 
 				<div class="row">
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Date</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#rEDate}}{{rEDate}}{{/rEDate}}{{^rEDate}}-{{/rEDate}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#rEDate}}{{rEDate}}{{/rEDate}}{{^rEDate}}-{{/rEDate}}</p>
 					</div>
 
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Hours Credit</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#rEHours}}{{rEHours}}{{/rEHours}}{{^rEHours}}-{{/rEHours}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#rEHours}}{{rEHours}}{{/rEHours}}{{^rEHours}}-{{/rEHours}}</p>
 					</div>
 				</div>
 			</div>
 		`;
 
 		const data = $.extend({}, this.eventData);
-		data.eDate = moment(data.eDate).format('MM/DD/YYYY');
+		data.rEDate = moment(data.rEDate).format('l');
 
 		const html = Mustache.render(template, data);
 
@@ -389,6 +429,7 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_setVolunteer(volunteerData) {
+		console.log('SET VOLUNTEER', volunteerData);
 		this.volunteerData = {
 			MainID: volunteerData.MainID
 		};
@@ -404,19 +445,19 @@ class TEORegistrationFormView extends NaviView {
 		const template = `
 			<div class="col-xs-12">
 				<div class="row">
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Volunteer Name</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#vName}}{{vName}}{{/vName}}{{^vName}}-{{/vName}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#vName}}{{vName}}{{/vName}}{{^vName}}-{{/vName}}</p>
 					</div>
 
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Day Phone</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#vPhoneDay}}{{vPhoneDay}}{{/vPhoneDay}}{{^vPhoneDay}}-{{/vPhoneDay}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#vPhoneDay}}{{vPhoneDay}}{{/vPhoneDay}}{{^vPhoneDay}}-{{/vPhoneDay}}</p>
 					</div>
 
-					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 15px;">
+					<div class="col-xs-12 col-md-4 form-group form-group-vertical" style="margin-bottom: 10px;">
 						<span class="staticlabel">Email</span>
-						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px;">{{#vEmail}}{{vEmail}}{{/vEmail}}{{^vEmail}}-{{/vEmail}}</p>
+						<p style="padding: 6px 12px; border: 1px solid #cccccc; border-radius: 4px; margin-bottom: 0;">{{#vEmail}}{{vEmail}}{{/vEmail}}{{^vEmail}}-{{/vEmail}}</p>
 					</div>
 				</div>
 			</div>
@@ -440,6 +481,8 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_create() {
+		console.log('ACTION CREATE', this.eventData, this.volunteerData);
+
 		if (this.eventData && this.volunteerData) {
 			this.data = {
 				MainID: this.volunteerData.MainID,
@@ -471,7 +514,7 @@ class TEORegistrationFormView extends NaviView {
 
 			$(':input').prop('disabled', true);
 			const _this = this;
-			const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration';
+			const url = baseEntityUrl + '/Registration';
 			$.ajax(url, {
 				headers: {
 					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -483,11 +526,11 @@ class TEORegistrationFormView extends NaviView {
 				data: JSON.stringify(_this.data),
 				dataType: 'JSON',
 				error: function error(jqXHR, textStatus, errorThrown) {
-					alert('An error has occured. ', errorThrown);
+					bootbox.alert('An error has occured. ', errorThrown);
 				},
 				method: 'POST',
 				success: function success(data) { // (data, textStatus, jqXHR) {
-					alert('Registration Created');
+					bootbox.alert('Registration Created');
 					// _this.navi.openView(_this.showOpts.returnView, {
 					// 	reload: true
 					// });
@@ -496,7 +539,7 @@ class TEORegistrationFormView extends NaviView {
 				}
 			});
 		} else {
-			alert('Missing information.');
+			bootbox.alert('Missing information.');
 		}
 	}
 
@@ -534,7 +577,7 @@ class TEORegistrationFormView extends NaviView {
 
 			$(':input').prop('disabled', true);
 			const _this = this;
-			const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration(\'' + id + '\')';
+			const url = baseEntityUrl + '/Registration(\'' + id + '\')';
 			$.ajax(url, {
 				headers: {
 					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -546,43 +589,45 @@ class TEORegistrationFormView extends NaviView {
 				data: JSON.stringify(_this.data),
 				dataType: 'JSON',
 				error: function error(jqXHR, textStatus, errorThrown) {
-					alert('An error has occured. ', errorThrown);
+					bootbox.alert('An error has occured. ', errorThrown);
 				},
 				method: 'PUT',
 				success: function success() { // (data, textStatus, jqXHR) {
-					alert('Registration Updated');
+					bootbox.alert('Registration Updated');
 					// _this.navi.openView(_this.showOpts.returnView, {
 					// 	reload: true
 					// });
 				}
 			});
 		} else {
-			alert('Incomplete information.');
+			bootbox.alert('Incomplete information.');
 		}
 	}
 
 	action_delete() {
-		$(':input').prop('disabled', true);
-		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration(\'' + this.data.id + '\')';
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			complete: function() {
-				$(':input').prop('disabled', false);
-			},
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify({ __Status: 'DEL'}),
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
-			},
-			method: 'PATCH',
-			success: function success() { // (data, textStatus, jqXHR) {
-				alert('Registration Deleted');
-				_this.navi.openView(_this.showOpts.returnView, {
-					reload: true
+		bootbox.prompt('You are about to delete a registration. Please type the word \'Delete\' to confirm.', (result) => {
+			if (result === 'Delete') {
+				$(':input').prop('disabled', true);
+
+				$.ajax(`${baseEntityUrl}/Registration('${this.data.id}')`, {
+					complete: () => {
+						$(':input').prop('disabled', false);
+					},
+					contentType: 'application/json; charset=utf-8',
+					dataType: 'JSON',
+					error: (jqXHR, textStatus, errorThrown) => {
+						bootbox.alert('An error has occured. ' + errorThrown);
+					},
+					headers: {
+						'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+					},
+					method: 'DELETE',
+					success: () => {
+						this.navi.openView(this.showOpts.returnView, {
+							operation: 'reload'
+						});
+						this.navi.closeView(this);
+					}
 				});
 			}
 		});
@@ -590,7 +635,7 @@ class TEORegistrationFormView extends NaviView {
 
 	action_getData(id, cbk) {
 		const _this = this;
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Registration(\'' + id + '\')';
+		const url = baseEntityUrl + '/Registration(\'' + id + '\')';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -598,10 +643,11 @@ class TEORegistrationFormView extends NaviView {
 			contentType: 'application/json; charset=utf-8',
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'GET',
 			success: function success(data) { // (data, textStatus, jqXHR) {
+				console.log('SUCCESS', data);
 				_this.data = data;
 				if (cbk) {
 					cbk();
@@ -613,7 +659,7 @@ class TEORegistrationFormView extends NaviView {
 	action_getEventData(id, cbk) {
 		const _this = this;
 		// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + id + '\')';
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event?$format=application/json&$filter=eKey eq \'' + id + '\'';
+		const url = baseEntityUrl + '/Event?$format=application/json&$filter=eKey eq \'' + id + '\'';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -621,7 +667,7 @@ class TEORegistrationFormView extends NaviView {
 			contentType: 'application/json; charset=utf-8',
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'GET',
 			success: function success(data) { // (data, textStatus, jqXHR) {
@@ -635,7 +681,7 @@ class TEORegistrationFormView extends NaviView {
 	action_getVolunteerData(id, cbk) {
 		const _this = this;
 		// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + id + '\')';
-		const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer?$format=application/json&$filter=MainID eq \'' + id + '\'';
+		const url = baseEntityUrl + '/Volunteer?$format=application/json&$filter=MainID eq \'' + id + '\'';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -643,7 +689,7 @@ class TEORegistrationFormView extends NaviView {
 			contentType: 'application/json; charset=utf-8',
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
-				alert('An error has occured. ', errorThrown);
+				bootbox.alert('An error has occured. ', errorThrown);
 			},
 			method: 'GET',
 			success: function success(data) { // (data, textStatus, jqXHR) {

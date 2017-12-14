@@ -98,7 +98,7 @@ class TEODashView extends NaviView {
 				});
 				this.dt = $table.DataTable();
 
-				$('#' + dtId + ' tbody')
+				$('#' + dtId + ' tbody', this.$topRegion)
 					.on('click', (e) => {
 						if ($(e.target).is('.btn')) {
 							e.preventDefault();
@@ -130,7 +130,7 @@ class TEODashView extends NaviView {
 			}
 		}, true);
 
-		$('.btn-reload').on('click', (e) => {
+		$('.btn-reload', this.$topRegion).on('click', (e) => {
 			e.preventDefault();
 			this.action_reload();
 		});
