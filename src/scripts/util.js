@@ -2,172 +2,172 @@
 /* global CotForm CotDropzone CotSession */
 cot_form.prototype.dropzoneFieldRender = function(originalfield) {
 	var field = $.extend(true, {}, originalfield);
-  // Main element.
-  var $el = $('<div></div>');
+	// Main element.
+	var $el = $('<div></div>');
 
-  // Hidden input element.
-  // For form.getData() and 'required' validation.
-  var $hiddenInput = $('<input type="hidden">')
-    .attr('data-fv-field', field.id)
-    .attr('id', field.id)
-    .attr('name', field.id);
-  if (field.required) {
-    $hiddenInput
-      .attr('aria-required', 'true')
-      .attr('class', 'required');
-  }
-  $el.append($hiddenInput);
+	// Hidden input element.
+	// For form.getData() and 'required' validation.
+	var $hiddenInput = $('<input type="hidden">')
+		.attr('data-fv-field', field.id)
+		.attr('id', field.id)
+		.attr('name', field.id);
+	if (field.required) {
+		$hiddenInput
+			.attr('aria-required', 'true')
+			.attr('class', 'required');
+	}
+	$el.append($hiddenInput);
 
-  // Dropzone div element.
-  var $dropzoneDiv = $('<div class="dropzone"></div>');
-  $el.append($dropzoneDiv);
+	// Dropzone div element.
+	var $dropzoneDiv = $('<div class="dropzone"></div>');
+	$el.append($dropzoneDiv);
 
-  // Dropzone.
-  var cotDropzone = $hiddenInput.get(0).cotDropzone = new CotDropzone();
-  // Fill from model.
-  cotDropzone._fillFromModel = function(model) {
-    if (field.bindTo) {
+	// Dropzone.
+	var cotDropzone = $hiddenInput.get(0).cotDropzone = new CotDropzone();
+	// Fill from model.
+	cotDropzone._fillFromModel = function(model) {
+		if (field.bindTo) {
 
-      // Get files as array.
-      var files = model.get(field.bindTo) || [];
-      if (typeof files === 'string') {
-        try {
-          files = JSON.parse(files);
-          if (!Array.isArray(files)) {
-            files = [];
-          }
-        } catch (e) {
-          files = [];
-        }
-      }
-      if (!Array.isArray(files)) {
-        files = [files];
-      }
+			// Get files as array.
+			var files = model.get(field.bindTo) || [];
+			if (typeof files === 'string') {
+				try {
+					files = JSON.parse(files);
+					if (!Array.isArray(files)) {
+						files = [];
+					}
+				} catch (e) {
+					files = [];
+				}
+			}
+			if (!Array.isArray(files)) {
+				files = [files];
+			}
 
-      // Set initial files.
-      cotDropzone.initFiles = files.map(function(file) {
-        file.status = 'initial';
-        return file;
-      });
+			// Set initial files.
+			cotDropzone.initFiles = files.map(function(file) {
+				file.status = 'initial';
+				return file;
+			});
 
-      // Reset dropzone files.
-      cotDropzone.dropzone.removeAllFiles(true);
-      for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        cotDropzone.dropzone.emit('addedfile', file);
-        cotDropzone.dropzone.emit('complete', file);
-        cotDropzone.dropzone.files.push(file);
-      }
+			// Reset dropzone files.
+			cotDropzone.dropzone.removeAllFiles(true);
+			for (var i = 0; i < files.length; i++) {
+				var file = files[i];
+				cotDropzone.dropzone.emit('addedfile', file);
+				cotDropzone.dropzone.emit('complete', file);
+				cotDropzone.dropzone.files.push(file);
+			}
 
-      // Update hidden input.
-      cotDropzone._updateHiddenIntput();
-    }
-  };
+			// Update hidden input.
+			cotDropzone._updateHiddenIntput();
+		}
+	};
 
-  // Update hidden input.
-  if (!field.options.valueMap) {
-    field.options.valueMap = function(file) {
-      var bin_id;
-      try {
-        bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
-      } catch (e) {
-        bin_id = null;
-      }
-      return {
-        bin_id: bin_id,
-        name: file.name,
-        size: file.size,
-        status: file.status,
-        type: file.type
-      }
-    }
-  }
-  cotDropzone._updateHiddenIntput = function() {
-    var value = cotDropzone.dropzone.files.filter(function(file) {
-      return file.status == 'initial' || file.status == 'success'
-    }).map(field.options.valueMap);
-    var textValue = value.length > 0 ? JSON.stringify(value) : '';
-    if (textValue != $hiddenInput.val()) {
-      $hiddenInput.val(textValue).trigger('change');
-      $hiddenInput.closest('form').data('formValidation').revalidateField($hiddenInput);
-    }
-  };
-  cotDropzone._watchChanges = function(form) {
-    if (field.bindTo) {
-      $hiddenInput.on('change', function() { // e) {
-        if (form._model) {
-          var newValue = cotDropzone.dropzone.files.filter(function(file) {
-            return file.status == 'initial' || file.status == 'success'
-          })
-          form._model.set(field['bindTo'], newValue);
-        }
-      });
-    }
-  };
-  cotDropzone.finalize = function(cbk) {
-    var step2 = function() {
-      if (!cotDropzone.initFiles) {
-        cotDropzone.initFiles = [];
-      }
-      var deletable = cotDropzone.initFiles.filter(function(file) {
-        return cotDropzone.dropzone.files.indexOf(file) == -1;
-      })
-      var keepable = cotDropzone.dropzone.files.filter(function(file) {
-        return cotDropzone.initFiles.indexOf(file) == -1;
-      });
-      if (cbk) {
-        cbk({
-          delete: deletable.filter(function(file) {
-            return file.status == 'initial' || file.status == 'success';
-          }),
-          keep: keepable.filter(function(file) {
-            return file.status == 'initial' || file.status == 'success';
-          })
-        });
-      }
-    };
-    var step1 = function() {
-      if (cotDropzone.dropzone.getQueuedFiles().length > 0) {
-        var success = function() {
-          cotDropzone.dropzone.off('success', success);
-          step1();
-        };
-        cotDropzone.dropzone.on('success', success);
-        cotDropzone.dropzone.processQueue();
-      } else {
-        step2();
-      }
-    };
-    step1();
-  };
+	// Update hidden input.
+	if (!field.options.valueMap) {
+		field.options.valueMap = function(file) {
+			var bin_id;
+			try {
+				bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+			} catch (e) {
+				bin_id = null;
+			}
+			return {
+				bin_id: bin_id,
+				name: file.name,
+				size: file.size,
+				status: file.status,
+				type: file.type
+			}
+		}
+	}
+	cotDropzone._updateHiddenIntput = function() {
+		var value = cotDropzone.dropzone.files.filter(function(file) {
+			return file.status == 'initial' || file.status == 'success'
+		}).map(field.options.valueMap);
+		var textValue = value.length > 0 ? JSON.stringify(value) : '';
+		if (textValue != $hiddenInput.val()) {
+			$hiddenInput.val(textValue).trigger('change');
+			$hiddenInput.closest('form').data('formValidation').revalidateField($hiddenInput);
+		}
+	};
+	cotDropzone._watchChanges = function(form) {
+		if (field.bindTo) {
+			$hiddenInput.on('change', function() { // e) {
+				if (form._model) {
+					var newValue = cotDropzone.dropzone.files.filter(function(file) {
+						return file.status == 'initial' || file.status == 'success'
+					})
+					form._model.set(field['bindTo'], newValue);
+				}
+			});
+		}
+	};
+	cotDropzone.finalize = function(cbk) {
+		var step2 = function() {
+			if (!cotDropzone.initFiles) {
+				cotDropzone.initFiles = [];
+			}
+			var deletable = cotDropzone.initFiles.filter(function(file) {
+				return cotDropzone.dropzone.files.indexOf(file) == -1;
+			})
+			var keepable = cotDropzone.dropzone.files.filter(function(file) {
+				return cotDropzone.initFiles.indexOf(file) == -1;
+			});
+			if (cbk) {
+				cbk({
+					delete: deletable.filter(function(file) {
+						return file.status == 'initial' || file.status == 'success';
+					}),
+					keep: keepable.filter(function(file) {
+						return file.status == 'initial' || file.status == 'success';
+					})
+				});
+			}
+		};
+		var step1 = function() {
+			if (cotDropzone.dropzone.getQueuedFiles().length > 0) {
+				var success = function() {
+					cotDropzone.dropzone.off('success', success);
+					step1();
+				};
+				cotDropzone.dropzone.on('success', success);
+				cotDropzone.dropzone.processQueue();
+			} else {
+				step2();
+			}
+		};
+		step1();
+	};
 
-  // Dropzone options.
-  field.options.selector = $dropzoneDiv;
-  if (field.options.includeCotFormInit != false) {
-    field.options.init = (function(oldInit) {
-      return function() {
-        if (oldInit) {
-          oldInit.apply(this, arguments);
-        }
-        this.on('success', function() { //file) {
-          cotDropzone._updateHiddenIntput();
-        });
-        this.on('removedfile', function() { //file) {
-          cotDropzone._updateHiddenIntput();
-        });
-      }
-    })(field.options.init);
-  }
-  if (!field.options.clickable && field.options.includeCotFormButton != false) {
-    $el.append('<p><button type="button" class="btn btn-default" id="' + field.id + 'Btn">Upload File</button></p>');
-    field.options.clickable = [$dropzoneDiv.get(0), $el.find('#' + field.id + 'Btn').get(0)];
-  }
+	// Dropzone options.
+	field.options.selector = $dropzoneDiv;
+	if (field.options.includeCotFormInit != false) {
+		field.options.init = (function(oldInit) {
+			return function() {
+				if (oldInit) {
+					oldInit.apply(this, arguments);
+				}
+				this.on('success', function() { //file) {
+					cotDropzone._updateHiddenIntput();
+				});
+				this.on('removedfile', function() { //file) {
+					cotDropzone._updateHiddenIntput();
+				});
+			}
+		})(field.options.init);
+	}
+	if (!field.options.clickable && field.options.includeCotFormButton != false) {
+		$el.append('<p><button type="button" class="btn btn-default" id="' + field.id + 'Btn">Upload File</button></p>');
+		field.options.clickable = [$dropzoneDiv.get(0), $el.find('#' + field.id + 'Btn').get(0)];
+	}
 
-  // Render dropzone.
-  cotDropzone.render(field.options);
+	// Render dropzone.
+	cotDropzone.render(field.options);
 
-  // Return wrapper element.
-  return $el.get(0);
+	// Return wrapper element.
+	return $el.get(0);
 };
 
 function CotForm2(definition) {
@@ -185,7 +185,7 @@ function CotForm2(definition) {
 		success: definition['success'] || function() {}
 	});
 	var that = this;
-	var bindableTypes = ['daterangepicker', 'datetimepicker','text', 'dropdown', 'textarea', 'checkbox', 'radio', 'password', 'multiselect', 'dropzone'];
+	var bindableTypes = ['daterangepicker', 'datetimepicker', 'text', 'dropdown', 'textarea', 'checkbox', 'radio', 'password', 'multiselect', 'dropzone'];
 	$.each(definition['sections'] || [], function(i, sectionInfo) {
 		var section = that.cotForm.addSection({
 			id: sectionInfo['id'] || 'section' + i,
@@ -319,7 +319,7 @@ class CotLoginExt extends cot_login {
 	constructor(options) {
 		const _onReady = options.onReady;
 		options.onReady = function(cot_login_instance) {
-			cot_login_instance.modal.on('shown.bs.modal', function () {
+			cot_login_instance.modal.on('shown.bs.modal', function() {
 				$('#username').focus()
 			});
 			if (_onReady) {
@@ -353,7 +353,7 @@ class CotLoginExt extends cot_login {
 		if (callback) {
 			this.modal
 				.off('hidden.bs.modal')
-				.on('hidden.bs.modal', function () { // e) {
+				.on('hidden.bs.modal', function() { // e) {
 					$(this).off('hidden.bs.modal');
 					callback();
 				});
@@ -370,7 +370,7 @@ class DataTablesODataBridge {
 		const _this = this;
 		return function(data) {
 
-				// DRAW
+			// DRAW
 			_this.draw = data.draw;
 
 			const retData = {};
@@ -436,3 +436,32 @@ class DataTablesODataBridge {
 		}
 	}
 }
+
+// CotSession.prototype.login = function(options) {
+// 	options = $.extend({
+// 		username: '', //the username to login with
+// 		password: '', //the password to login with
+// 		success: function() {}, //a function to call after a successful login
+// 		error: function() {}, //a function to call after an unsuccessful login
+// 		always: function() {} //a function to always call after the whole login attempt is complete
+// 	}, options || {});
+//
+// 	var url = this.options.ccApiOrigin + this.options.ccApiPath + 'session?app=' + this.options.appName;
+// 	var payload = {
+// 		user: options.username,
+// 		pwd: options.password
+// 	};
+// 	var that = this;
+// 	$.post(url, payload, function(data) {
+// 		if (!data['error']) {
+// 			that._storeLogin(data);
+// 			options.success();
+// 		} else if (data.error === 'invalid_user_or_pwd') {
+// 			options.error(null, 'Invalid username or password', data.error);
+// 		}
+// 	}).fail(function(jqXHR, textStatus, error) {
+// 		options.error(jqXHR, textStatus, error);
+// 	}).always(function() {
+// 		options.always();
+// 	});
+// };
