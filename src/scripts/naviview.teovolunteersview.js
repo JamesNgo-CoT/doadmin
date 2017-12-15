@@ -86,6 +86,7 @@ class TEOVolunteersView extends NaviView {
 				const $table = $('#' + data.id);
 				$table.oDataTable({
 					ajax: {
+						error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 						headers: {
 							'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
 						},

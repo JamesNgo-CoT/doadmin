@@ -90,10 +90,11 @@ class TEOEventsView extends NaviView {
 		const $table = $('#' + data.id);
 		$table.oDataTable({
 			ajax: {
-				url: baseEntityUrl + '/Event',
+				error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 				headers: {
 					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
-				}
+				},
+				url: baseEntityUrl + '/Event'
 			},
 			columns: [{
 				class: 'noMaxWidth',

@@ -691,6 +691,7 @@ class TEOVolunteerFormView extends NaviView {
 			$table.oDataTable({
 				$filter: `MainID eq '${model.get('MainID')}'`,
 				ajax: {
+					error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 					headers: {
 						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
 					},

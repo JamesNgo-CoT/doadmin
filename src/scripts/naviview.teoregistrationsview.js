@@ -87,6 +87,7 @@ class TEORegistrationsView extends NaviView {
 				const $table = $('#' + data.id);
 				$table.oDataTable({
 					ajax: {
+						error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 						url: baseEntityUrl + '/Registration',
 						headers: {
 							'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid

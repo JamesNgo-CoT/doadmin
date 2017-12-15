@@ -440,6 +440,7 @@ class TEOEventFormView extends NaviView {
 			$table.oDataTable({
 				$filter: `eKey eq '${model.get('eKey')}'`,
 				ajax: {
+					error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 					url: baseEntityUrl + '/Registration',
 					headers: {
 						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid

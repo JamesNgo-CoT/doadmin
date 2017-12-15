@@ -164,6 +164,7 @@ class TEORegistrationFormView extends NaviView {
 			$filter: `eState eq 'Approved'`,
 			$select: 'eHours,eKey,eLocation',
 			ajax: {
+				error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 				url: baseEntityUrl + '/Event',
 				headers: {
 					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
@@ -221,6 +222,7 @@ class TEORegistrationFormView extends NaviView {
 			$filter: `vAppStatus eq 'Approved' and vStatus eq 'Active'`,
 			$select: 'MainID,vEmail,vEmergName,vEmergPhone,vEmergRel,vPhoneCell,vPhoneEve',
 			ajax: {
+				error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 				url: `${baseEntityUrl}/Volunteer`,
 				headers: {
 					'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`

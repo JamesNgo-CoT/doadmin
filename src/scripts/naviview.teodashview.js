@@ -41,6 +41,7 @@ class TEODashView extends NaviView {
 				const $table = $('#' + dtId);
 				$table.oDataTable({
 					ajax: {
+						error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
 						headers: {
 							'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
 						},
@@ -63,7 +64,6 @@ class TEODashView extends NaviView {
 						data: 'vFName',
 						title: 'First Name',
 						default: ''
-
 					}, {
 						data: 'vStatus',
 						title: 'Volunteer Status',
@@ -74,7 +74,6 @@ class TEODashView extends NaviView {
 						title: 'Application Status',
 						default: '',
 						searchChoices: ['', 'New', 'Approved', 'Archived']
-
 					}, {
 						data: 'vPhoneDay',
 						title: 'Day Phone',
