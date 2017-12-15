@@ -1,5 +1,5 @@
 /* exported TEORegistrationsView */
-/* global NaviView DataTablesODataBridge Mustache CotSession moment baseEntityUrl */
+/* global NaviView Mustache CotSession moment baseEntityUrl */
 
 class TEORegistrationsView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -18,34 +18,38 @@ class TEORegistrationsView extends NaviView {
 				this.action_newRegistration();
 			}
 		}, {
+			separator: true
+		}, {
 			label: 'Copy',
 			action: () => {
-				$('.buttons-copy', this.$topRegion).trigger('click');
-			}
-		}, {
-			label: 'Export CSV',
-			action: () => {
-				$('.buttons-csv', this.$topRegion).trigger('click');
-			}
-		}, {
-			label: 'Export Excel',
-			action: () => {
-				$('.buttons-excel', this.$topRegion).trigger('click');
-			}
-		}, {
-			label: 'Export PDF',
-			action: () => {
-				$('.buttons-pdf', this.$topRegion).trigger('click');
+				$('.buttons-copy', $(`.${this.className}.top`)).trigger('click');
 			}
 		}, {
 			label: 'Print',
 			action: () => {
-				$('.buttons-print', this.$topRegion).trigger('click');
+				$('.buttons-print', $(`.${this.className}.top`)).trigger('click');
+			}
+		}, {
+			separator: true
+		}, {
+			label: 'Export CSV',
+			action: () => {
+				$('.buttons-csv', $(`.${this.className}.top`)).trigger('click');
+			}
+		}, {
+			label: 'Export Excel',
+			action: () => {
+				$('.buttons-excel', $(`.${this.className}.top`)).trigger('click');
+			}
+		}, {
+			label: 'Export PDF',
+			action: () => {
+				$('.buttons-pdf', $(`.${this.className}.top`)).trigger('click');
 			}
 		}];
 		this.inDynamicMenu = false;
 
-		this.bridge = new DataTablesODataBridge();
+		// this.bridge = new DataTablesODataBridge();
 
 		this.render();
 	}

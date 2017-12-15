@@ -5,44 +5,48 @@ class TEOEventsView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
 		super(sourceKey, instanceKey, navi, initOptions);
 
-		const _this = this;
+		// const _this = this;
 
 		this.title = 'Events';
 		this.search = null;
 		this.actionMenuItems = [{
 			label: 'Reload Data',
-			action: function() {
-				_this.action_reload();
+			action: () => {
+				this.action_reload();
 			}
 		}, {
 			label: 'New Event',
-			action: function() {
-				_this.action_newEvent();
+			action: () => {
+				this.action_newEvent();
 			}
+		}, {
+			separator: true
 		}, {
 			label: 'Copy',
-			action: function() {
-				$('.buttons-copy').trigger('click');
-			}
-		}, {
-			label: 'Export CSV',
-			action: function() {
-				$('.buttons-csv').trigger('click');
-			}
-		}, {
-			label: 'Export Excel',
-			action: function() {
-				$('.buttons-excel').trigger('click');
-			}
-		}, {
-			label: 'Export PDF',
-			action: function() {
-				$('.buttons-pdf').trigger('click');
+			action: () => {
+				$('.buttons-copy', $(`.${this.className}.top`)).trigger('click');
 			}
 		}, {
 			label: 'Print',
-			action: function() {
-				$('.buttons-print').trigger('click');
+			action: () => {
+				$('.buttons-print', $(`.${this.className}.top`)).trigger('click');
+			}
+		}, {
+			separator: true
+		}, {
+			label: 'Export CSV',
+			action: () => {
+				$('.buttons-csv', $(`.${this.className}.top`)).trigger('click');
+			}
+		}, {
+			label: 'Export Excel',
+			action: () => {
+				$('.buttons-excel', $(`.${this.className}.top`)).trigger('click');
+			}
+		}, {
+			label: 'Export PDF',
+			action: () => {
+				$('.buttons-pdf', $(`.${this.className}.top`)).trigger('click');
 			}
 		}];
 		this.inDynamicMenu = false;

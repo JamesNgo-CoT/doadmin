@@ -26,29 +26,29 @@ class TEOVolunteersView extends NaviView {
 		}, {
 			label: 'Copy',
 			action: () => {
-				$('.buttons-copy').trigger('click');
+				$('.buttons-copy', $(`.${this.className}.top`)).trigger('click');
 			}
 		}, {
 			label: 'Print',
 			action: () => {
-				$('.buttons-print').trigger('click');
+				$('.buttons-print', $(`.${this.className}.top`)).trigger('click');
 			}
 		}, {
 			separator: true
 		}, {
 			label: 'Export CSV',
 			action: () => {
-				$('.buttons-csv').trigger('click');
+				$('.buttons-csv', $(`.${this.className}.top`)).trigger('click');
 			}
 		}, {
 			label: 'Export Excel',
 			action: () => {
-				$('.buttons-excel').trigger('click');
+				$('.buttons-excel', $(`.${this.className}.top`)).trigger('click');
 			}
 		}, {
 			label: 'Export PDF',
 			action: () => {
-				$('.buttons-pdf').trigger('click');
+				$('.buttons-pdf', $(`.${this.className}.top`)).trigger('click');
 			}
 		}];
 
