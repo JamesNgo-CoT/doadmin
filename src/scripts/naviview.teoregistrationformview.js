@@ -206,14 +206,14 @@ class TEORegistrationFormView extends NaviView {
 				if ($(e.target).is('.btn')) {
 					e.preventDefault();
 					const eventData = this.edt.row($(e.target).closest('tr')).data();
-					console.log('SETTING EVENT DATA', eventData);
+					// console.log('SETTING EVENT DATA', eventData);
 					this.action_setEvent(eventData);
 				}
 			})
 			.on('dblclick', (e) => {
 				e.preventDefault();
 				const eventData = this.edt.row($(e.target).closest('tr')).data();
-				console.log('SETTING EVENT DATA', eventData);
+				// console.log('SETTING EVENT DATA', eventData);
 				this.action_setEvent(eventData);
 			});
 
@@ -291,27 +291,27 @@ class TEORegistrationFormView extends NaviView {
 
 	show(showOpts = {}) {
 		super.show(showOpts);
-		console.log('SHOW', showOpts);
+		// console.log('SHOW', showOpts);
 
 		this.showOpts = showOpts || {};
 
 		const _this = this;
 
 		function proceedPreview() {
-			console.log('PROCEED PREVIEW');
+			// console.log('PROCEED PREVIEW');
 			// TODO - PREVIEW
 		}
 
 		function proceedUpdate() {
-			console.log('PROCEED UPDATE');
+			// console.log('PROCEED UPDATE');
 			$('.btns-new, .btns-update, .btns-preview, #eventSection .row.datatable, #eventSection .row.buttons, #eventSection .row.buttons .btn-cancel, #eventSection .row.buttons .btn-change, #volunteerSection .row.buttons, #volunteerSection .row.datatable, #volunteerSection .row.buttons .btn-cancel, #volunteerSection .row.buttons .btn-change', _this.$topRegion).hide();
 			$('.btns-update', _this.$topRegion).show();
 
 			// const eventId = _this.data.rEId;
 			const eventId = _this.data.eKey;
-			console.log('EVENTID', eventId);
+			// console.log('EVENTID', eventId);
 			_this.action_getEventData(eventId, function(eventData) {
-				console.log('EVENTDATA', eventData);
+				// console.log('EVENTDATA', eventData);
 				_this.action_setEvent(eventData);
 			});
 
@@ -364,7 +364,7 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_setEvent(eventData) {
-		console.log('SET EVENT', eventData);
+		// console.log('SET EVENT', eventData);
 
 		this.eventData = {
 			// rEId: eventData.id
@@ -431,7 +431,7 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_setVolunteer(volunteerData) {
-		console.log('SET VOLUNTEER', volunteerData);
+		// console.log('SET VOLUNTEER', volunteerData);
 		this.volunteerData = {
 			MainID: volunteerData.MainID
 		};
@@ -483,7 +483,7 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_create() {
-		console.log('ACTION CREATE', this.eventData, this.volunteerData);
+		// console.log('ACTION CREATE', this.eventData, this.volunteerData);
 
 		if (this.eventData && this.volunteerData) {
 			this.data = {
@@ -649,7 +649,7 @@ class TEORegistrationFormView extends NaviView {
 			},
 			method: 'GET',
 			success: function success(data) { // (data, textStatus, jqXHR) {
-				console.log('SUCCESS', data);
+				// console.log('SUCCESS', data);
 				_this.data = data;
 				if (cbk) {
 					cbk();
