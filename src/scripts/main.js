@@ -1,11 +1,13 @@
 /* exported baseConfigUrl baseEntityUrl baseUploadUrl baseURL baseUploadSubmitUrl baseUploadKeepUrl */
 /* global NaviBar CotLoginExt */
 
-const baseURL = 'https://was-intra-sit.toronto.ca'
+const baseURL = 'https://was-intra-sit.toronto.ca';
 const baseEntityUrl = baseURL + '/c3api_data/v2/DataAccess.svc/live_green_volunteer';
 const baseConfigUrl = baseURL + '/c3api_config/v2/ConfigService.svc/ConfigSet';
 const baseUploadUrl = baseURL + '/cc_sr_admin_v1/upload/live_green_volunteer';
+// const baseUploadUrl = baseURL + '/cc_sr_admin_v1/upload/jngo2';
 const baseUploadSubmitUrl = baseURL + '/cc_sr_admin_v1/upload/live_green_volunteer/live_green_volunteer';
+// const baseUploadSubmitUrl = baseURL + '/cc_sr_admin_v1/upload/jngo2/jngo2';
 const baseUploadKeepUrl = baseURL + '/cc_sr_admin_v1/submit/live_green_volunteer?keepFiles=';
 
 $.fn.oDataTable.headerWrapperString = '<div style="margin-right: -15px;"></div>';
@@ -19,12 +21,11 @@ $(document).ready(function() {
 	cotApp = new cot_app('Live Green Volunteer Admin');
 	cotApp.render(function() {
 
-		//	cotApp.setTitle('Live Green Volunteer Admin');
+		// cotApp.setTitle('Live Green Volunteer Admin');
 
-		// cotLogin = new cot_login({
 		cotLogin = new CotLoginExt({
-			appName: 'lgv',
-			ccRoot: 'https://insideto-secure.toronto.ca',
+			appName: 'live_green_volunteer',
+			ccRoot: baseURL, // 'https://insideto-secure.toronto.ca',
 			welcomeSelector: null,
 			onReady: function() { // (cot_login_instance) {
 				const viewSources = {
