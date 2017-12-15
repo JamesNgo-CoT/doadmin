@@ -561,9 +561,9 @@ class TEOEventFormView extends NaviView {
 		}
 	}
 
-	action_submitPutRecord(model) {
+	action_submitPutRecord(model, fromPost) {
 		$(':input').prop('disabled', true);
-		const _this = this;
+		// const _this = this;
 		const url = baseEntityUrl + '/Event(\'' + this.id + '\')';
 
 		let data = model.toJSON();
@@ -613,24 +613,34 @@ class TEOEventFormView extends NaviView {
 				eTimeStart: data.eTimeStart,
 				eTypeOf: data.eTypeOf,
 				eAttachments: data.eAttachments
-			}
+			};
 
 			$.ajax(url, {
 				headers: {
-					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
 				},
-				complete: function() {
+				complete: () => {
 					$(':input').prop('disabled', false);
 				},
 				contentType: 'application/json; charset=utf-8',
 				data: JSON.stringify(data),
 				dataType: 'JSON',
-				error: function error(jqXHR, textStatus, errorThrown) {
+				error: (jqXHR, textStatus, errorThrown) => {
 					bootbox.alert('An error has occured. ', errorThrown);
 				},
 				method: 'PUT',
-				success: function success() { // (data, textStatus, jqXHR) {
-					bootbox.alert('Event Updated');
+				success: () => { // (data, textStatus, jqXHR) {
+					if (fromPost) {
+						this.show({
+							operation: 'update',
+							data: data,
+							returnView: this.returnView
+						});
+						this.navi.render();
+						bootbox.alert('Event Added');
+					} else {
+						bootbox.alert('Event Updated');
+					}
 				}
 			});
 		});
@@ -638,81 +648,98 @@ class TEOEventFormView extends NaviView {
 
 	action_submitPostRecord(model) {
 		$(':input').prop('disabled', true);
-		const _this = this;
-		const url = baseEntityUrl + '/Event';
+		// const _this = this;
+		// const url = baseEntityUrl + '/Event';
 
-		let data = model.toJSON();
-		new Promise((resolve) => {
-			if (data.eAttachments) {
-				data.eAttachments = data.eAttachments.map((file) => {
-					var bin_id;
-					if (file.bin_id) {
-						bin_id = file.bin_id;
-					} else {
-						try {
-							bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
-						} catch (e) {
-							bin_id = null;
-						}
-					}
-					return {
-						bin_id: bin_id,
-						name: file.name,
-						size: file.size,
-						status: file.status,
-						type: file.type
-					}
-				});
-				this.keepFiles(data.eAttachments, () => {
-					resolve();
-				});
-			} else {
-				resolve();
+		// let data = model.toJSON();
+		// new Promise((resolve) => {
+		// 	if (data.eAttachments) {
+		// 		data.eAttachments = data.eAttachments.map((file) => {
+		// 			var bin_id;
+		// 			if (file.bin_id) {
+		// 				bin_id = file.bin_id;
+		// 			} else {
+		// 				try {
+		// 					bin_id = JSON.parse(file.xhr.response).BIN_ID[0];
+		// 				} catch (e) {
+		// 					bin_id = null;
+		// 				}
+		// 			}
+		// 			return {
+		// 				bin_id: bin_id,
+		// 				name: file.name,
+		// 				size: file.size,
+		// 				status: file.status,
+		// 				type: file.type
+		// 			}
+		// 		});
+		// 		this.keepFiles(data.eAttachments, () => {
+		// 			resolve();
+		// 		});
+		// 	} else {
+		// 		resolve();
+		// 	}
+		// }).then(() => {
+		// 	data = {
+		// 		eContEmail: data.eContEmail,
+		// 		eContName: data.eContName,
+		// 		eContPhone: data.eContPhone,
+		// 		eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+		// 		eHours: data.eHours,
+		// 		eKey: data.eKey || this.id,
+		// 		eLocation: data.eLocation,
+		// 		eName: data.eName,
+		// 		eNotes: data.eNotes,
+		// 		eSpeakerInfo: data.eSpeakerInfo,
+		// 		eSpeakerName: data.eSpeakerName,
+		// 		eState: data.eState,
+		// 		eTimeEnd: data.eTimeEnd,
+		// 		eTimeStart: data.eTimeStart,
+		// 		eTypeOf: data.eTypeOf,
+		// 		eAttachments: data.eAttachments
+		// 	};
+      //
+		// 	$.ajax(url, {
+		// 		headers: {
+		// 			'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+		// 		},
+		// 		complete: function() {
+		// 			$(':input').prop('disabled', false);
+		// 		},
+		// 		contentType: 'application/json; charset=utf-8',
+		// 		data: JSON.stringify(data),
+		// 		dataType: 'JSON',
+		// 		error: function error(jqXHR, textStatus, errorThrown) {
+		// 			bootbox.alert('An error has occured. ', errorThrown);
+		// 		},
+		// 		method: 'POST',
+		// 		success: function success(data) { // , textStatus, jqXHR) {
+		// 			_this.show({
+		// 				operation: 'update',
+		// 				data: data,
+		// 				returnView: _this.returnView
+		// 			});
+		// 			_this.navi.render();
+		// 			bootbox.alert('Event Added');
+		// 		}
+		// 	});
+		// });
+
+		$.ajax(`${baseEntityUrl}/Event`, {
+			headers: {
+				'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+			},
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify({}),
+			dataType: 'JSON',
+			error: (jqXHR, textStatus, errorThrown) => {
+				bootbox.alert('An error has occured. ', errorThrown);
+			},
+			method: 'POST',
+			success: (data) => { // , textStatus, jqXHR) {
+				this.id = data.id;
+				this.action_submitPutRecord(model, true);
 			}
-		}).then(() => {
-			data = {
-				eContEmail: data.eContEmail,
-				eContName: data.eContName,
-				eContPhone: data.eContPhone,
-				eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
-				eHours: data.eHours,
-				eKey: data.eKey || this.id,
-				eLocation: data.eLocation,
-				eName: data.eName,
-				eNotes: data.eNotes,
-				eSpeakerInfo: data.eSpeakerInfo,
-				eSpeakerName: data.eSpeakerName,
-				eState: data.eState,
-				eTimeEnd: data.eTimeEnd,
-				eTimeStart: data.eTimeStart,
-				eTypeOf: data.eTypeOf,
-				eAttachments: data.eAttachments
-			};
-
-			$.ajax(url, {
-				headers: {
-					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-				},
-				complete: function() {
-					$(':input').prop('disabled', false);
-				},
-				contentType: 'application/json; charset=utf-8',
-				data: JSON.stringify(data),
-				dataType: 'JSON',
-				error: function error(jqXHR, textStatus, errorThrown) {
-					bootbox.alert('An error has occured. ', errorThrown);
-				},
-				method: 'POST',
-				success: function success(data) { // , textStatus, jqXHR) {
-					_this.show({
-						operation: 'update',
-						data: data,
-						returnView: _this.returnView
-					});
-					_this.navi.render();
-					bootbox.alert('Event Added');
-				}
-			});
 		});
 	}
 

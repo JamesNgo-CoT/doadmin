@@ -877,10 +877,10 @@ class TEOVolunteerFormView extends NaviView {
 		});
 	}
 
-	putRecord(json) {
+	putRecord(json, fromPost) {
 		$(':input').prop('disabled', true);
-		const _this = this;
-		const url = baseEntityUrl + '/Volunteer(\'' + this.id + '\')';
+
+		const url = `${baseEntityUrl}/Volunteer('${this.id}')`;
 
 		json = {
 			MainID: json.MainID || this.id,
@@ -917,7 +917,7 @@ class TEOVolunteerFormView extends NaviView {
 
 		$.ajax(url, {
 			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+				'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
 			},
 			complete: function() {
 				$(':input').prop('disabled', false);
@@ -929,72 +929,39 @@ class TEOVolunteerFormView extends NaviView {
 				bootbox.alert('An error has occured. ' + errorThrown);
 			},
 			method: 'PUT',
-			success: function success() { // (data, textStatus, jqXHR) {
-				bootbox.alert('Volunteer Updated');
+			success: (data) => {
+				if (fromPost) {
+					bootbox.alert('Volunteer Added');
+					this.show({
+						operation: 'update',
+						data: data,
+						returnView: this.returnView
+					});
+					this.navi.render();
+				} else {
+					bootbox.alert('Volunteer Updated');
+				}
 			}
 		});
 	}
 
 	postRecord(json) {
 		$(':input').prop('disabled', true);
-		const _this = this;
-		const url = baseEntityUrl + '/Volunteer';
 
-		json = {
-			MainID: json.MainID || this.id,
-			vAODA: json.vAODA,
-			vAddress: json.vAddress,
-			vAge: json.vAge,
-			vAppStatus: json.vAppStatus,
-			vAttachments: json.vAttachments,
-			vCity: json.vCity,
-			vDateApproved: moment(json.vDateApproved).isValid() ? moment(json.vDateApproved).utc().format() : null,
-			vDateSubmitted: moment(json.vDateSubmitted).isValid() ? moment(json.vDateSubmitted).utc().format() : null,
-			vEmail: json.vEmail,
-			vEmergName: json.vEmergName,
-			vEmergPhone: json.vEmergPhone,
-			vEmergPhoneAlt: json.vEmergPhoneAlt,
-			vEmergRel: json.vEmergRel,
-			vFName: json.vFName,
-			vForms: json.vForms,
-			vGradDate: moment(json.vGradDate).isValid() ? moment(json.vGradDate).utc().format() : null,
-			vGraduate: json.vGraduate,
-			vLName: json.vLName,
-			vLang: json.vLang,
-			vLanguageOther: json.vLanguageOther,
-			vNotes: json.vNotes,
-			vPCode: json.vPCode,
-			vPhoneCell: json.vPhoneCell,
-			vPhoneDay: json.vPhoneDay,
-			vPhoneEve: json.vPhoneEve,
-			vSource: json.vSource,
-			vSourceOther: json.vSourceOther,
-			vStatus: json.vStatus,
-			vToronto: json.vToronto
-		};
-
-		$.ajax(url, {
+		$.ajax(`${baseEntityUrl}/Volunteer`, {
 			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			complete: function() {
-				$(':input').prop('disabled', false);
+				'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
 			},
 			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(json),
+			data: JSON.stringify({}),
 			dataType: 'JSON',
 			error: function error(jqXHR, textStatus, errorThrown) {
 				bootbox.alert('An error has occured. ' + errorThrown);
 			},
 			method: 'POST',
-			success: function success(data) { // , textStatus, jqXHR) {
-				bootbox.alert('Volunteer Added');
-				_this.show({
-					operation: 'update',
-					data: data,
-					returnView: _this.returnView
-				});
-				_this.navi.render();
+			success: (data) => {
+				this.id = data.id;
+				this.putRecord(json, true);
 			}
 		});
 	}
