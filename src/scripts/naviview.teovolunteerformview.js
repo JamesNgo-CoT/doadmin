@@ -578,6 +578,7 @@ class TEOVolunteerFormView extends NaviView {
 							previewFormDef.sections[i1].rows[i2].fields[i3].value = '-';
 						} else {
 							if (id == 'vAttachments') {
+								console.log('V ATTACHMENTS BIN ID', value, value);
 								const template = `
 									<ul>
 										{{#values}}
@@ -859,6 +860,7 @@ class TEOVolunteerFormView extends NaviView {
 							type: file.type
 						}
 					});
+					model.set('vAttachments', json.vAttachments);
 					this.keepFiles(json.vAttachments, () => {
 						resolve();
 					});

@@ -587,6 +587,7 @@ class TEOEventFormView extends NaviView {
 						type: file.type
 					}
 				});
+				model.set('eAttachments', data.eAttachments);
 				this.keepFiles(data.eAttachments, () => {
 					resolve();
 				});
