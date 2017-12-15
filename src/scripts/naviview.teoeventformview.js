@@ -339,7 +339,7 @@ class TEOEventFormView extends NaviView {
 								<ul>
 									{{#values}}
 									<li>
-										{{name}} (<a href="${baseUploadUrl}/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+										{{name}} (<a href="${baseUploadUrl}/{{bin_id}}?sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
 									</li>
 									{{/values}}
 								</ul>

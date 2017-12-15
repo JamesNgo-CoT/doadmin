@@ -578,12 +578,11 @@ class TEOVolunteerFormView extends NaviView {
 							previewFormDef.sections[i1].rows[i2].fields[i3].value = '-';
 						} else {
 							if (id == 'vAttachments') {
-								console.log('V ATTACHMENTS BIN ID', value, value);
 								const template = `
 									<ul>
 										{{#values}}
 										<li>
-											{{name}} (<a href="${baseUploadUrl}/{{bin_id}}&sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
+											{{name}} (<a href="${baseUploadUrl}/{{bin_id}}?sid=${_this.initOptions.cotLogin.sid}" target="_blank">Download</a>)
 										</li>
 										{{/values}}
 									</ul>
