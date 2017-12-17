@@ -125,7 +125,8 @@ class TEOVolunteersView extends NaviView {
 						}, {
 							data: 'vStatus',
 							title: 'Status',
-							default: ''
+							default: '',
+							searchChoices: ['', 'Active', 'Unsubscribed', 'Duplicate']
 						}, {
 							data: 'vEmail',
 							title: 'Email',

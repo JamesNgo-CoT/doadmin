@@ -1,4 +1,4 @@
-/* exported CotForm2 CotLoginExt DataTablesODataBridge */
+/* exported CotForm2 CotLoginExt DataTablesODataBridge loginGate */
 /* global CotForm CotDropzone CotSession */
 cot_form.prototype.dropzoneFieldRender = function(originalfield) {
 	var field = $.extend(true, {}, originalfield);
@@ -358,7 +358,6 @@ class CotLoginExt extends cot_login {
 					callback();
 				});
 		}
-
 		super.showLogin();
 	}
 }
@@ -465,3 +464,19 @@ class DataTablesODataBridge {
 // 		options.always();
 // 	});
 // };
+
+function loginGate(cotLogin) {
+	return new Promise((resolve, reject) => {
+		if (cotLogin.isLoggedIn()) {
+			resolve();
+		} else {
+			cotLogin.showLogin(() => {
+				if (cotLogin.isLoggedIn()) {
+					resolve();
+				} else {
+					reject();
+				}
+			})
+		}
+	});
+}

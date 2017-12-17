@@ -1,5 +1,5 @@
 /* exported TEORegistrationFormView */
-/* global NaviView Mustache moment baseEntityUrl */
+/* global NaviView Mustache moment baseEntityUrl CotSession */
 
 class TEORegistrationFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -159,134 +159,146 @@ class TEORegistrationFormView extends NaviView {
 			this.action_setVolunteer(this.volunteerData);
 		});
 
-		// const eBridge = new DataTablesODataBridge();
-		const $table = $('#' + this.className + '_edt').oDataTable({
-			$filter: `eState eq 'Approved'`,
-			$select: 'eHours,eKey,eLocation',
-			ajax: {
-				error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
-				url: baseEntityUrl + '/Event',
-				headers: {
-					'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
-				}
-			},
-			columns: [{
-				data: 'eDate',
-				title: 'Event Date',
-				default: '',
-				render: function(data) {
-					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-				},
-				searchType: 'date'
-			}, {
-				className: 'noMaxWidth',
-				data: 'eName',
-				title: 'Event Name',
-				default: ''
-			}, {
-				data: 'eTypeOf',
-				title: 'Event Type',
-				default: ''
-			}, {
-				className: 'action',
-				data: 'id',
-				title: 'Action',
-				render: () => {
-					return '<button type="button" class="btn btn-primary">Select</button>'
-				},
-				orderable: false,
-				searchable: false
-			}],
-			dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
-			lengthMenu: [5, 10, 20]
-		});
-		this.edt = $table.DataTable();
-		$('#' + this.className + '_edt tbody')
-			.on('click', (e) => {
-				if ($(e.target).is('.btn')) {
-					e.preventDefault();
-					const eventData = this.edt.row($(e.target).closest('tr')).data();
-					// console.log('SETTING EVENT DATA', eventData);
-					this.action_setEvent(eventData);
-				}
-			})
-			.on('dblclick', (e) => {
-				e.preventDefault();
-				const eventData = this.edt.row($(e.target).closest('tr')).data();
-				// console.log('SETTING EVENT DATA', eventData);
-				this.action_setEvent(eventData);
-			});
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
 
-		// const vBridge = new DataTablesODataBridge();
-		const $vtable = $('#' + this.className + '_vdt').oDataTable({
-			$filter: `vAppStatus eq 'Approved' and vStatus eq 'Active'`,
-			$select: 'MainID,vEmail,vEmergName,vEmergPhone,vEmergRel,vPhoneCell,vPhoneEve',
-			ajax: {
-				error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
-				url: `${baseEntityUrl}/Volunteer`,
-				headers: {
-					'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
-				}
-			},
-			columns: [{
-				data: 'vLName',
-				title: 'Last Name',
-				default: ''
-			}, {
-				data: 'vFName',
-				title: 'First Name',
-				default: ''
-			}, {
-				data: 'vPhoneDay',
-				title: 'Day Phone',
-				default: ''
-			}, {
-				data: 'vDateApproved',
-				title: 'Date Approved',
-				default: '',
-				render: function(data) {
-					return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
-				},
-				searchType: 'date'
-			// }, {
-			// 	data: 'vStatus',
-			// 	title: 'Status',
-			// 	default: ''
-			}, {
-				data: 'vEmail',
-				title: 'Email',
-				default: ''
-			}, {
-				data: 'vLang',
-				title: 'Languages',
-				default: ''
-			}, {
-				className: 'action',
-				data: 'id',
-				title: 'Action',
-				render: () => {
-					return '<button type="button" class="btn btn-primary">Select</button>'
-				},
-				orderable: false,
-				searchable: false
-			}],
-			dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
-			lengthMenu: [5, 10, 20]
-		});
-		this.vdt = $vtable.DataTable();
-		$('#' + this.className + '_vdt tbody')
-			.on('click', (e) => {
-				if ($(e.target).is('.btn')) {
-					e.preventDefault();
-					var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
-					this.action_setVolunteer(volunteerData);
-				}
-			})
-			.on('dblclick', (e) => {
-				e.preventDefault();
-				var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
-				this.action_setVolunteer(volunteerData);
-			});
+				// const eBridge = new DataTablesODataBridge();
+				const $table = $('#' + this.className + '_edt')
+				$table.oDataTable({
+					$filter: `eState eq 'Approved'`,
+					$select: 'eHours,eKey,eLocation',
+					ajax: {
+						error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
+						url: baseEntityUrl + '/Event',
+						headers: {
+							'Authorization': 'AuthSession ' + this.initOptions.cotLogin.sid
+						}
+					},
+					columns: [{
+						data: 'eDate',
+						title: 'Event Date',
+						default: '',
+						render: function(data) {
+							return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
+						},
+						searchType: 'date'
+					}, {
+						className: 'noMaxWidth',
+						data: 'eName',
+						title: 'Event Name',
+						default: ''
+					}, {
+						data: 'eTypeOf',
+						title: 'Event Type',
+						default: ''
+					}, {
+						className: 'action',
+						data: 'id',
+						title: 'Action',
+						render: () => {
+							return '<button type="button" class="btn btn-primary">Select</button>'
+						},
+						orderable: false,
+						searchable: false
+					}],
+					dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+					lengthMenu: [5, 10, 20]
+				});
+				this.edt = $table.DataTable();
+				$('#' + this.className + '_edt tbody')
+					.on('click', (e) => {
+						if ($(e.target).is('.btn')) {
+							e.preventDefault();
+							const eventData = this.edt.row($(e.target).closest('tr')).data();
+							// console.log('SETTING EVENT DATA', eventData);
+							this.action_setEvent(eventData);
+						}
+					})
+					.on('dblclick', (e) => {
+						e.preventDefault();
+						const eventData = this.edt.row($(e.target).closest('tr')).data();
+						// console.log('SETTING EVENT DATA', eventData);
+						this.action_setEvent(eventData);
+					});
+
+				// const vBridge = new DataTablesODataBridge();
+				const $vtable = $('#' + this.className + '_vdt')
+				$vtable.oDataTable({
+					$filter: `vAppStatus eq 'Approved' and vStatus eq 'Active'`,
+					$select: 'MainID,vEmail,vEmergName,vEmergPhone,vEmergRel,vPhoneCell,vPhoneEve',
+					ajax: {
+						error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
+						url: `${baseEntityUrl}/Volunteer`,
+						headers: {
+							'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+						}
+					},
+					columns: [{
+						data: 'vLName',
+						title: 'Last Name',
+						default: ''
+					}, {
+						data: 'vFName',
+						title: 'First Name',
+						default: ''
+					}, {
+						data: 'vPhoneDay',
+						title: 'Day Phone',
+						default: ''
+					}, {
+						data: 'vDateApproved',
+						title: 'Date Approved',
+						default: '',
+						render: function(data) {
+							return moment(data).isValid() ? moment(data).format('MM/DD/YYYY') : '';
+						},
+						searchType: 'date'
+						// }, {
+						// 	data: 'vStatus',
+						// 	title: 'Status',
+						// 	default: ''
+					}, {
+						data: 'vEmail',
+						title: 'Email',
+						default: ''
+					}, {
+						data: 'vLang',
+						title: 'Languages',
+						default: ''
+					}, {
+						className: 'action',
+						data: 'id',
+						title: 'Action',
+						render: () => {
+							return '<button type="button" class="btn btn-primary">Select</button>'
+						},
+						orderable: false,
+						searchable: false
+					}],
+					dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+					lengthMenu: [5, 10, 20]
+				});
+				this.vdt = $vtable.DataTable();
+				$('#' + this.className + '_vdt tbody')
+					.on('click', (e) => {
+						if ($(e.target).is('.btn')) {
+							e.preventDefault();
+							var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
+							this.action_setVolunteer(volunteerData);
+						}
+					})
+					.on('dblclick', (e) => {
+						e.preventDefault();
+						var volunteerData = this.vdt.row($(e.target).closest('tr')).data();
+						this.action_setVolunteer(volunteerData);
+					});
+
+			}
+		}, true);
+
+
 	}
 
 	show(showOpts = {}) {
@@ -351,12 +363,15 @@ class TEORegistrationFormView extends NaviView {
 			$('.btns-update, .btns-preview, #eventSection .row.buttons, #eventSection .row.buttons .btn-cancel, #eventSection .row.buttons .btn-change, #volunteerSection .row.buttons, #volunteerSection .row.buttons .btn-cancel, #volunteerSection .row.buttons .btn-change').hide();
 			$('.btns-new, #eventSection .row.datatable, #volunteerSection .row.datatable').show();
 
-			this.edt.ajax.reload();
+			if (this.edt) {
+				this.edt.ajax.reload();
+			}
 			if (showOpts.eventData) {
 				this.action_setEvent(showOpts.eventData);
 			}
-
-			this.vdt.ajax.reload();
+			if (this.vdt) {
+				this.vdt.ajax.reload();
+			}
 			if (showOpts.volunteerData) {
 				this.action_setVolunteer(showOpts.volunteerData);
 			}
@@ -483,223 +498,262 @@ class TEORegistrationFormView extends NaviView {
 	}
 
 	action_create() {
-		// console.log('ACTION CREATE', this.eventData, this.volunteerData);
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				// console.log('ACTION CREATE', this.eventData, this.volunteerData);
 
-		if (this.eventData && this.volunteerData) {
-			this.data = {
-				MainID: this.volunteerData.MainID,
-				eDate: this.eventData.rEDate,
-				eKey: this.eventData.eKey,
-				rEHours: this.eventData.rEHours,
-				rELocation: this.eventData.rELocation,
-				rEName: this.eventData.rEName,
-				rEType: this.eventData.rETypeOf,
-				vEmail: this.volunteerData.vEmail,
-				vEmergName: this.volunteerData.vEmergName,
-				vEmergPhone: this.volunteerData.vEmergPhone,
-				vEmergPhoneAlt: this.volunteerData.vEmergPhoneAlt,
-				vEmergRel: this.volunteerData.vEmergRel,
-				vFName: this.volunteerData.vFName,
-				vLName: this.volunteerData.vLName,
-				vPhoneCell: this.volunteerData.vPhoneCell,
-				vPhoneDay: this.volunteerData.vPhoneDay,
-				vPhoneEve: this.volunteerData.vPhoneEve
-			};
+				if (this.eventData && this.volunteerData) {
+					this.data = {
+						MainID: this.volunteerData.MainID,
+						eDate: this.eventData.rEDate,
+						eKey: this.eventData.eKey,
+						rEHours: this.eventData.rEHours,
+						rELocation: this.eventData.rELocation,
+						rEName: this.eventData.rEName,
+						rEType: this.eventData.rETypeOf,
+						vEmail: this.volunteerData.vEmail,
+						vEmergName: this.volunteerData.vEmergName,
+						vEmergPhone: this.volunteerData.vEmergPhone,
+						vEmergPhoneAlt: this.volunteerData.vEmergPhoneAlt,
+						vEmergRel: this.volunteerData.vEmergRel,
+						vFName: this.volunteerData.vFName,
+						vLName: this.volunteerData.vLName,
+						vPhoneCell: this.volunteerData.vPhoneCell,
+						vPhoneDay: this.volunteerData.vPhoneDay,
+						vPhoneEve: this.volunteerData.vPhoneEve
+					};
 
-			// for (let k in this.eventData) {
-			// 	this.data[k] = this.eventData[k];
-			// }
-			//
-			// for (let k in this.volunteerData) {
-			// 	this.data[k] = this.volunteerData[k];
-			// }
+					// for (let k in this.eventData) {
+					// 	this.data[k] = this.eventData[k];
+					// }
+					//
+					// for (let k in this.volunteerData) {
+					// 	this.data[k] = this.volunteerData[k];
+					// }
 
-			$(':input').prop('disabled', true);
-			const _this = this;
-			const url = baseEntityUrl + '/Registration';
-			$.ajax(url, {
-				headers: {
-					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-				},
-				complete: function() {
-					$(':input').prop('disabled', false);
-				},
-				contentType: 'application/json; charset=utf-8',
-				data: JSON.stringify(_this.data),
-				dataType: 'JSON',
-				error: function error(jqXHR, textStatus, errorThrown) {
-					bootbox.alert('An error has occured. ', errorThrown);
-				},
-				method: 'POST',
-				success: function success(data) { // (data, textStatus, jqXHR) {
-					bootbox.alert('Registration Created');
-					// _this.navi.openView(_this.showOpts.returnView, {
-					// 	reload: true
-					// });
-					_this.show({ returnView: _this.showOpts.returnView, data: data });
-					_this.navi.render();
+					$(':input').prop('disabled', true);
+					const _this = this;
+					const url = baseEntityUrl + '/Registration';
+					$.ajax(url, {
+						headers: {
+							'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+						},
+						complete: function() {
+							$(':input').prop('disabled', false);
+						},
+						contentType: 'application/json; charset=utf-8',
+						data: JSON.stringify(_this.data),
+						dataType: 'JSON',
+						error: function error(jqXHR, textStatus, errorThrown) {
+							bootbox.alert('An error has occured. ', errorThrown);
+						},
+						method: 'POST',
+						success: function success(data) { // (data, textStatus, jqXHR) {
+							bootbox.alert('Registration Created');
+							// _this.navi.openView(_this.showOpts.returnView, {
+							// 	reload: true
+							// });
+							_this.show({
+								returnView: _this.showOpts.returnView,
+								data: data
+							});
+							_this.navi.render();
+						}
+					});
+				} else {
+					bootbox.alert('Missing information.');
 				}
-			});
-		} else {
-			bootbox.alert('Missing information.');
-		}
+			}
+		}, true);
 	}
 
 	action_update() {
-		if (this.eventData && this.volunteerData) {
-			const id = this.data.id;
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				if (this.eventData && this.volunteerData) {
+					const id = this.data.id;
 
-			this.data = {
-				MainID: this.volunteerData.MainID,
-				eDate: this.eventData.rEDate,
-				eKey: this.eventData.eKey,
-				rEHours: this.eventData.rEHours,
-				rELocation: this.eventData.rELocation,
-				rEName: this.eventData.rEName,
-				rEType: this.eventData.rETypeOf,
-				vEmail: this.volunteerData.vEmail,
-				vEmergName: this.volunteerData.vEmergName,
-				vEmergPhone: this.volunteerData.vEmergPhone,
-				vEmergPhoneAlt: this.volunteerData.vEmergPhoneAlt,
-				vEmergRel: this.volunteerData.vEmergRel,
-				vFName: this.volunteerData.vFName,
-				vLName: this.volunteerData.vLName,
-				vPhoneCell: this.volunteerData.vPhoneCell,
-				vPhoneDay: this.volunteerData.vPhoneDay,
-				vPhoneEve: this.volunteerData.vPhoneEve
-			};
+					this.data = {
+						MainID: this.volunteerData.MainID,
+						eDate: this.eventData.rEDate,
+						eKey: this.eventData.eKey,
+						rEHours: this.eventData.rEHours,
+						rELocation: this.eventData.rELocation,
+						rEName: this.eventData.rEName,
+						rEType: this.eventData.rETypeOf,
+						vEmail: this.volunteerData.vEmail,
+						vEmergName: this.volunteerData.vEmergName,
+						vEmergPhone: this.volunteerData.vEmergPhone,
+						vEmergPhoneAlt: this.volunteerData.vEmergPhoneAlt,
+						vEmergRel: this.volunteerData.vEmergRel,
+						vFName: this.volunteerData.vFName,
+						vLName: this.volunteerData.vLName,
+						vPhoneCell: this.volunteerData.vPhoneCell,
+						vPhoneDay: this.volunteerData.vPhoneDay,
+						vPhoneEve: this.volunteerData.vPhoneEve
+					};
 
-			// for (let k in this.eventData) {
-			// 	this.data[k] = this.eventData[k];
-			// }
-			//
-			// for (let k in this.volunteerData) {
-			// 	this.data[k] = this.volunteerData[k];
-			// }
+					// for (let k in this.eventData) {
+					// 	this.data[k] = this.eventData[k];
+					// }
+					//
+					// for (let k in this.volunteerData) {
+					// 	this.data[k] = this.volunteerData[k];
+					// }
 
-			$(':input').prop('disabled', true);
-			const _this = this;
-			const url = baseEntityUrl + '/Registration(\'' + id + '\')';
-			$.ajax(url, {
-				headers: {
-					'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-				},
-				complete: function() {
-					$(':input').prop('disabled', false);
-				},
-				contentType: 'application/json; charset=utf-8',
-				data: JSON.stringify(_this.data),
-				dataType: 'JSON',
-				error: function error(jqXHR, textStatus, errorThrown) {
-					bootbox.alert('An error has occured. ', errorThrown);
-				},
-				method: 'PUT',
-				success: function success() { // (data, textStatus, jqXHR) {
-					bootbox.alert('Registration Updated');
-					// _this.navi.openView(_this.showOpts.returnView, {
-					// 	reload: true
-					// });
+					$(':input').prop('disabled', true);
+					const _this = this;
+					const url = baseEntityUrl + '/Registration(\'' + id + '\')';
+					$.ajax(url, {
+						headers: {
+							'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+						},
+						complete: function() {
+							$(':input').prop('disabled', false);
+						},
+						contentType: 'application/json; charset=utf-8',
+						data: JSON.stringify(_this.data),
+						dataType: 'JSON',
+						error: function error(jqXHR, textStatus, errorThrown) {
+							bootbox.alert('An error has occured. ', errorThrown);
+						},
+						method: 'PUT',
+						success: function success() { // (data, textStatus, jqXHR) {
+							bootbox.alert('Registration Updated');
+							// _this.navi.openView(_this.showOpts.returnView, {
+							// 	reload: true
+							// });
+						}
+					});
+				} else {
+					bootbox.alert('Incomplete information.');
 				}
-			});
-		} else {
-			bootbox.alert('Incomplete information.');
-		}
+			}
+		}, true);
 	}
 
 	action_delete() {
-		bootbox.prompt('You are about to delete a registration. Please type the word \'Delete\' to confirm.', (result) => {
-			if (result === 'Delete') {
-				$(':input').prop('disabled', true);
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				bootbox.prompt('You are about to delete a registration. Please type the word \'Delete\' to confirm.', (result) => {
+					if (result === 'Delete') {
+						$(':input').prop('disabled', true);
 
-				$.ajax(`${baseEntityUrl}/Registration('${this.data.id}')`, {
-					complete: () => {
-						$(':input').prop('disabled', false);
-					},
-					contentType: 'application/json; charset=utf-8',
-					dataType: 'JSON',
-					error: (jqXHR, textStatus, errorThrown) => {
-						bootbox.alert('An error has occured. ' + errorThrown);
-					},
-					headers: {
-						'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
-					},
-					method: 'DELETE',
-					success: () => {
-						this.navi.openView(this.showOpts.returnView, {
-							operation: 'reload'
+						$.ajax(`${baseEntityUrl}/Registration('${this.data.id}')`, {
+							complete: () => {
+								$(':input').prop('disabled', false);
+							},
+							contentType: 'application/json; charset=utf-8',
+							dataType: 'JSON',
+							error: (jqXHR, textStatus, errorThrown) => {
+								bootbox.alert('An error has occured. ' + errorThrown);
+							},
+							headers: {
+								'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+							},
+							method: 'DELETE',
+							success: () => {
+								this.navi.openView(this.showOpts.returnView, {
+									operation: 'reload'
+								});
+								this.navi.closeView(this);
+							}
 						});
-						this.navi.closeView(this);
 					}
 				});
 			}
-		});
+		}, true);
 	}
 
 	action_getData(id, cbk) {
-		const _this = this;
-		const url = baseEntityUrl + '/Registration(\'' + id + '\')';
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			contentType: 'application/json; charset=utf-8',
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				bootbox.alert('An error has occured. ', errorThrown);
-			},
-			method: 'GET',
-			success: function success(data) { // (data, textStatus, jqXHR) {
-				// console.log('SUCCESS', data);
-				_this.data = data;
-				if (cbk) {
-					cbk();
-				}
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				const _this = this;
+				const url = baseEntityUrl + '/Registration(\'' + id + '\')';
+				$.ajax(url, {
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					},
+					contentType: 'application/json; charset=utf-8',
+					dataType: 'JSON',
+					error: function error(jqXHR, textStatus, errorThrown) {
+						bootbox.alert('An error has occured. ', errorThrown);
+					},
+					method: 'GET',
+					success: function success(data) { // (data, textStatus, jqXHR) {
+						// console.log('SUCCESS', data);
+						_this.data = data;
+						if (cbk) {
+							cbk();
+						}
+					}
+				});
 			}
-		});
+		}, true);
 	}
 
 	action_getEventData(id, cbk) {
-		const _this = this;
-		// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + id + '\')';
-		const url = baseEntityUrl + '/Event?$format=application/json&$filter=eKey eq \'' + id + '\'';
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			contentType: 'application/json; charset=utf-8',
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				bootbox.alert('An error has occured. ', errorThrown);
-			},
-			method: 'GET',
-			success: function success(data) { // (data, textStatus, jqXHR) {
-				if (cbk) {
-					cbk(data.value[0]);
-				}
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				const _this = this;
+				// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Event(\'' + id + '\')';
+				const url = baseEntityUrl + '/Event?$format=application/json&$filter=eKey eq \'' + id + '\'';
+				$.ajax(url, {
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					},
+					contentType: 'application/json; charset=utf-8',
+					dataType: 'JSON',
+					error: function error(jqXHR, textStatus, errorThrown) {
+						bootbox.alert('An error has occured. ', errorThrown);
+					},
+					method: 'GET',
+					success: function success(data) { // (data, textStatus, jqXHR) {
+						if (cbk) {
+							cbk(data.value[0]);
+						}
+					}
+				});
 			}
-		});
+		}, true);
 	}
 
 	action_getVolunteerData(id, cbk) {
-		const _this = this;
-		// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + id + '\')';
-		const url = baseEntityUrl + '/Volunteer?$format=application/json&$filter=MainID eq \'' + id + '\'';
-		$.ajax(url, {
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			contentType: 'application/json; charset=utf-8',
-			dataType: 'JSON',
-			error: function error(jqXHR, textStatus, errorThrown) {
-				bootbox.alert('An error has occured. ', errorThrown);
-			},
-			method: 'GET',
-			success: function success(data) { // (data, textStatus, jqXHR) {
-				if (cbk) {
-					cbk(data.value[0]);
-				}
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				const _this = this;
+				// const url = 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/TEOVolunteer/Volunteer(\'' + id + '\')';
+				const url = baseEntityUrl + '/Volunteer?$format=application/json&$filter=MainID eq \'' + id + '\'';
+				$.ajax(url, {
+					headers: {
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+					},
+					contentType: 'application/json; charset=utf-8',
+					dataType: 'JSON',
+					error: function error(jqXHR, textStatus, errorThrown) {
+						bootbox.alert('An error has occured. ', errorThrown);
+					},
+					method: 'GET',
+					success: function success(data) { // (data, textStatus, jqXHR) {
+						if (cbk) {
+							cbk(data.value[0]);
+						}
+					}
+				});
 			}
-		});
+		}, true);
 	}
 
 	// action_submit(model) {

@@ -1,5 +1,5 @@
 /* exported TEOEventFormView */
-/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl baseUploadKeepUrl */
+/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl baseUploadKeepUrl CotSession */
 
 class TEOEventFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -435,76 +435,86 @@ class TEOEventFormView extends NaviView {
 			_this.form.render('.' + _this.className + '_formWrapper');
 			// _this.form.setModel(model);
 
-			// DATATABLE
-			const $table = $('#' + _this.className + '_dt');
-			$table.oDataTable({
-				$filter: `eKey eq '${model.get('eKey')}'`,
-				ajax: {
-					error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
-					url: baseEntityUrl + '/Registration',
-					headers: {
-						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-					}
-				},
-				columns: [{
-					data: 'vLName',
-					title: 'Last Name',
-					default: ''
-				}, {
-					data: 'vFName',
-					title: 'First Name',
-					default: ''
-				}, {
-					data: 'vEmail',
-					title: 'Email',
-					default: ''
-				}, {
-					data: 'vPhoneCell',
-					title: 'Mobile Phone',
-					default: ''
-				}, {
-					className: 'action',
-					data: 'id',
-					title: 'Action',
-					render: function() {
-						return '<button type="button" class="btn btn-primary">View</button>'
-					},
-					orderable: false,
-					searchable: false
-				}],
-				dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
-				lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
-			});
 
-			_this.dt = $table.DataTable();
+			_this.initOptions.cotLogin.isLoggedIn((result) => {
+				if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+					_this.initOptions.cotLogin.logout();
+				} else {
 
-			$('#' + _this.className + '_dt tbody')
-				.on('click', function(e) {
-					if ($(e.target).is('.btn')) {
-						e.preventDefault();
-						var data = _this.dt.row($(e.target).closest('tr')).data();
-						const sourceKey = _this.initOptions.registrationForm;
-						const showOptions = {
-							id: data.id,
-							returnView: _this
-						};
-						const instanceKey = null;
-						const autoInstanceKey = true;
-						_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
-					}
-				})
-				.on('dblclick', function(e) {
-					e.preventDefault();
-					var data = _this.dt.row($(e.target).closest('tr')).data();
-					const sourceKey = _this.initOptions.registrationForm;
-					const showOptions = {
-						id: data.id,
-						returnView: _this
-					};
-					const instanceKey = null;
-					const autoInstanceKey = true;
-					_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
-				});
+					// DATATABLE
+					const $table = $('#' + _this.className + '_dt');
+					$table.oDataTable({
+						$filter: `eKey eq '${model.get('eKey')}'`,
+						ajax: {
+							error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error occured. ${errorThrown}`),
+							url: baseEntityUrl + '/Registration',
+							headers: {
+								'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
+							}
+						},
+						columns: [{
+							data: 'vLName',
+							title: 'Last Name',
+							default: ''
+						}, {
+							data: 'vFName',
+							title: 'First Name',
+							default: ''
+						}, {
+							data: 'vEmail',
+							title: 'Email',
+							default: ''
+						}, {
+							data: 'vPhoneCell',
+							title: 'Mobile Phone',
+							default: ''
+						}, {
+							className: 'action',
+							data: 'id',
+							title: 'Action',
+							render: function() {
+								return '<button type="button" class="btn btn-primary">View</button>'
+							},
+							orderable: false,
+							searchable: false
+						}],
+						dom: `<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'table-responsive'<'col-sm-12'tr>>><'row'<'col-sm-5'i><'col-sm-7'p>>B`,
+						lengthMenu: [10, 25, 50, 75, 100, 500, 1000]
+					});
+
+					_this.dt = $table.DataTable();
+
+					$('#' + _this.className + '_dt tbody')
+						.on('click', function(e) {
+							if ($(e.target).is('.btn')) {
+								e.preventDefault();
+								var data = _this.dt.row($(e.target).closest('tr')).data();
+								const sourceKey = _this.initOptions.registrationForm;
+								const showOptions = {
+									id: data.id,
+									returnView: _this
+								};
+								const instanceKey = null;
+								const autoInstanceKey = true;
+								_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+							}
+						})
+						.on('dblclick', function(e) {
+							e.preventDefault();
+							var data = _this.dt.row($(e.target).closest('tr')).data();
+							const sourceKey = _this.initOptions.registrationForm;
+							const showOptions = {
+								id: data.id,
+								returnView: _this
+							};
+							const instanceKey = null;
+							const autoInstanceKey = true;
+							_this.navi.openView(sourceKey, showOptions, instanceKey, autoInstanceKey);
+						});
+
+				}
+			}, true);
+
 		}
 
 		if (showOpts.data) {
@@ -554,11 +564,17 @@ class TEOEventFormView extends NaviView {
 	}
 
 	action_submit(model) {
-		if (this.id) {
-			this.action_submitPutRecord(model);
-		} else {
-			this.action_submitPostRecord(model);
-		}
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				if (this.id) {
+					this.action_submitPutRecord(model);
+				} else {
+					this.action_submitPostRecord(model);
+				}
+			}
+		}, true);
 	}
 
 	action_submitPutRecord(model, fromPost) {
@@ -698,7 +714,7 @@ class TEOEventFormView extends NaviView {
 		// 		eTypeOf: data.eTypeOf,
 		// 		eAttachments: data.eAttachments
 		// 	};
-      //
+		//
 		// 	$.ajax(url, {
 		// 		headers: {
 		// 			'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
@@ -744,50 +760,62 @@ class TEOEventFormView extends NaviView {
 	}
 
 	getRecord(id, callback) {
-		const _this = this;
-		const url = `${baseEntityUrl}/Event('${id}')`;
-		$.ajax(url, {
-			contentType: 'application/json; charset=utf-8',
-			dataType: 'JSON',
-			error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error has occured. ${errorThrown}`),
-			headers: {
-				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
-			},
-			method: 'GET',
-			success: (data) => {
-				data.eDate = moment(data.eDate).isValid() ? moment(data.eDate).format('l') : '';
-				callback(data);
-			}
-		});
-	}
-
-	action_delete(id, returnView) {
-		bootbox.prompt('You are about to delete an event. Please type the word \'Delete\' to confirm.', (result) => {
-			if (result === 'Delete') {
-				$(':input').prop('disabled', true);
-
-				$.ajax(`${baseEntityUrl}/Event('${id}')`, {
-					complete: () => {
-						$(':input').prop('disabled', false);
-					},
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				const _this = this;
+				const url = `${baseEntityUrl}/Event('${id}')`;
+				$.ajax(url, {
 					contentType: 'application/json; charset=utf-8',
 					dataType: 'JSON',
-					error: (jqXHR, textStatus, errorThrown) => {
-						bootbox.alert('An error has occured. ' + errorThrown);
-					},
+					error: (jqXHR, textStatus, errorThrown) => bootbox.alert(`An error has occured. ${errorThrown}`),
 					headers: {
-						'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+						'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid
 					},
-					method: 'DELETE',
-					success: () => {
-						this.navi.openView(returnView, {
-							operation: 'reload'
-						});
-						this.navi.closeView(this);
+					method: 'GET',
+					success: (data) => {
+						data.eDate = moment(data.eDate).isValid() ? moment(data.eDate).format('l') : '';
+						callback(data);
 					}
 				});
 			}
-		});
+		}, true);
+	}
+
+	action_delete(id, returnView) {
+		this.initOptions.cotLogin.isLoggedIn((result) => {
+			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
+				this.initOptions.cotLogin.logout();
+			} else {
+				bootbox.prompt('You are about to delete an event. Please type the word \'Delete\' to confirm.', (result) => {
+					if (result === 'Delete') {
+						$(':input').prop('disabled', true);
+
+						$.ajax(`${baseEntityUrl}/Event('${id}')`, {
+							complete: () => {
+								$(':input').prop('disabled', false);
+							},
+							contentType: 'application/json; charset=utf-8',
+							dataType: 'JSON',
+							error: (jqXHR, textStatus, errorThrown) => {
+								bootbox.alert('An error has occured. ' + errorThrown);
+							},
+							headers: {
+								'Authorization': `AuthSession ${this.initOptions.cotLogin.sid}`
+							},
+							method: 'DELETE',
+							success: () => {
+								this.navi.openView(returnView, {
+									operation: 'reload'
+								});
+								this.navi.closeView(this);
+							}
+						});
+					}
+				});
+			}
+		}, true);
 	}
 
 	keepFiles(attachments, cbk) {
