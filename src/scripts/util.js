@@ -1,5 +1,5 @@
 /* exported CotForm2 CotLoginExt DataTablesODataBridge loginGate keepFiles */
-/* global CotForm CotDropzone CotSession */
+/* global CotForm CotDropzone CotSession baseUploadKeepUrl */
 cot_form.prototype.dropzoneFieldRender = function(originalfield) {
 	var field = $.extend(true, {}, originalfield);
 	// Main element.

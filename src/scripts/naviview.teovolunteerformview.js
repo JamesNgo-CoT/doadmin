@@ -505,6 +505,7 @@ class TEOVolunteerFormView extends NaviView {
 
 			$('.btn-done', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
+				console.log('DONE BUTTON CLICK - SHOW OPTIION DATA:', originalData)
 				_this.show({
 					operation: 'view',
 					data: originalData,
@@ -520,7 +521,8 @@ class TEOVolunteerFormView extends NaviView {
 			_this.formDef.success = function(e) {
 				e.preventDefault();
 				_this.submit(model, originalData);
-				originalData = model.toJSON();
+				// originalData = model.toJSON();
+				console.log('SET ORIGINAL DATA', originalData, 'FROM', model.toJSON())
 				return false;
 			}
 			_this.form = new CotForm2(_this.formDef);
@@ -547,7 +549,7 @@ class TEOVolunteerFormView extends NaviView {
 		const _this = this;
 
 		function renderViewVolunteer(model) {
-			console.log('MODEL', model.toJSON());
+			console.log('VIEW MODEL', model.toJSON());
 
 			const previewFormDef = $.extend(true, {}, _this.formDef);
 			previewFormDef.useBinding = false;
@@ -763,9 +765,11 @@ class TEOVolunteerFormView extends NaviView {
 		}
 
 		if (showOpts.data) {
+			console.log('USING EXISTING DATA', showOpts.data);
 			renderViewVolunteer(new CotModel(showOpts.data));
 		} else if (showOpts.id) {
 			this.getRecord(showOpts.id, function(data) {
+				console.log('USING RECORD DATA', data);
 				renderViewVolunteer(new CotModel(data));
 				_this.navi.render();
 			});
@@ -872,6 +876,7 @@ class TEOVolunteerFormView extends NaviView {
 								}
 							});
 							model.set('vAttachments', json.vAttachments);
+							originalData.vAttachments = json.vAttachments;
 							this.keepFiles(json.vAttachments, originalData.vAttachments, () => {
 								resolve();
 							});
@@ -879,8 +884,9 @@ class TEOVolunteerFormView extends NaviView {
 							resolve();
 						}
 					}).then(() => {
+						console.log('SUBMIT', json);
 						if (this.id) {
-							this.putRecord(json);
+							this.putRecord(json, false);
 						} else {
 							this.postRecord(json);
 						}

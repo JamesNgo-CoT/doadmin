@@ -293,7 +293,7 @@ class TEOEventFormView extends NaviView {
 			_this.formDef.success = function(e) {
 				e.preventDefault();
 				_this.action_submit(model, originalData);
-				originalData = model.toJSON();
+				// originalData = model.toJSON();
 				return false;
 			}
 			_this.form = new CotForm2(_this.formDef);
@@ -610,6 +610,7 @@ class TEOEventFormView extends NaviView {
 					}
 				});
 				model.set('eAttachments', data.eAttachments);
+				originalData.eAttachments = data.eAttachments;
 				this.keepFiles(data.eAttachments, originalData.eAttachments, () => {
 					resolve();
 				});
