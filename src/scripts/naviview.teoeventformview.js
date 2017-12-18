@@ -1,5 +1,6 @@
 /* exported TEOEventFormView */
 /* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl baseUploadKeepUrl CotSession */
+/* global baseBinUtilUrl */
 
 class TEOEventFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
@@ -14,7 +15,7 @@ class TEOEventFormView extends NaviView {
 			rootPath: '',
 			success: (e) => {
 				e.preventDefault();
-				this.action_submit();
+				// this.action_submit();
 				return false;
 			},
 			useBinding: true,
@@ -223,12 +224,16 @@ class TEOEventFormView extends NaviView {
 			$('#' + _this.className + '_eForm').trigger('submit');
 		});
 
-		let model = new CotModel({});
+		const model = new CotModel({});
+
+		const originalData = model.toJSON();
+
 		this.formDef.success = function(e) {
 			e.preventDefault();
-			_this.action_submit(model);
+			_this.action_submit(model, originalData);
 			return false;
 		}
+
 		this.form = new CotForm2(this.formDef);
 		this.form.render('.' + this.className + '_formWrapper');
 		this.form.setModel(model);
@@ -287,7 +292,7 @@ class TEOEventFormView extends NaviView {
 
 			_this.formDef.success = function(e) {
 				e.preventDefault();
-				_this.action_submit(model);
+				_this.action_submit(model, originalData);
 				originalData = model.toJSON();
 				return false;
 			}
@@ -563,21 +568,21 @@ class TEOEventFormView extends NaviView {
 		}
 	}
 
-	action_submit(model) {
+	action_submit(model, originalData) {
 		this.initOptions.cotLogin.isLoggedIn((result) => {
 			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
 				this.initOptions.cotLogin.logout();
 			} else {
 				if (this.id) {
-					this.action_submitPutRecord(model);
+					this.action_submitPutRecord(model, originalData, false);
 				} else {
-					this.action_submitPostRecord(model);
+					this.action_submitPostRecord(model, originalData);
 				}
 			}
 		}, true);
 	}
 
-	action_submitPutRecord(model, fromPost) {
+	action_submitPutRecord(model, originalData, fromPost) {
 		$(':input').prop('disabled', true);
 		// const _this = this;
 		const url = baseEntityUrl + '/Event(\'' + this.id + '\')';
@@ -605,7 +610,7 @@ class TEOEventFormView extends NaviView {
 					}
 				});
 				model.set('eAttachments', data.eAttachments);
-				this.keepFiles(data.eAttachments, () => {
+				this.keepFiles(data.eAttachments, originalData.eAttachments, () => {
 					resolve();
 				});
 			} else {
@@ -662,7 +667,7 @@ class TEOEventFormView extends NaviView {
 		});
 	}
 
-	action_submitPostRecord(model) {
+	action_submitPostRecord(model, originalData) {
 		$(':input').prop('disabled', true);
 		// const _this = this;
 		// const url = baseEntityUrl + '/Event';
@@ -754,7 +759,7 @@ class TEOEventFormView extends NaviView {
 			method: 'POST',
 			success: (data) => { // , textStatus, jqXHR) {
 				this.id = data.id;
-				this.action_submitPutRecord(model, true);
+				this.action_submitPutRecord(model, originalData, true);
 			}
 		});
 	}
@@ -818,17 +823,59 @@ class TEOEventFormView extends NaviView {
 		}, true);
 	}
 
-	keepFiles(attachments, cbk) {
-		const url = baseUploadKeepUrl + attachments.map((attachment) => attachment.bin_id).join(',');
-		$.ajax(url, {
-			data: JSON.stringify({}),
-			error: (jqXHR, textStatus, errorThrown) => {
-				bootbox.alert(`An error has occured. ${errorThrown}`);
-			},
-			method: 'GET',
-			success: () => {
-				cbk();
+	// keepFiles_old(attachments, cbk) {
+	// 	const url = baseUploadKeepUrl + attachments.map((attachment) => attachment.bin_id).join(',');
+	// 	$.ajax(url, {
+	// 		data: JSON.stringify({}),
+	// 		error: (jqXHR, textStatus, errorThrown) => {
+	// 			bootbox.alert(`An error has occured. ${errorThrown}`);
+	// 		},
+	// 		method: 'GET',
+	// 		success: () => {
+	// 			cbk();
+	// 		}
+	// 	});
+	// }
+
+	keepFiles(attachments, originalAttachments, cbk) {
+		console.log(attachments, originalAttachments);
+
+		const activities = [];
+
+		const deletables = originalAttachments.filter((attachment) => {
+			const l = attachments.length;
+			for (let i = 0; i < l; i++) {
+				if (attachments[i].bin_id === attachment.bin_id) {
+					return false
+				}
 			}
-		});
+			return true
+		})
+		const dl = deletables.length
+		for (let i = 0; i < dl; i++) {
+			activities.push(new Promise((resolve, reject) => {
+				$.ajax(`${baseBinUtilUrl}/${deletables[i].bin_id}/delete?sid=${this.initOptions.cotLogin.sid}`, {
+					error: (jqXHR, textStatus, errorThrown) => { reject(errorThrown) },
+					method: 'GET',
+					success: (data) => { resolve(data) }
+				})
+			}))
+		}
+
+		const keepable = attachments.filter((attachment) => attachment.status === 'success')
+		const kl = keepable.length;
+		for (let i = 0; i < kl; i++) {
+			activities.push(new Promise((resolve, reject) => {
+				$.ajax(`${baseBinUtilUrl}/${keepable[i].bin_id}/keep?sid=${this.initOptions.cotLogin.sid}`, {
+					error: (jqXHR, textStatus, errorThrown) => { reject(errorThrown) },
+					method: 'GET',
+					success: (data) => { resolve(data) }
+				})
+			}))
+		}
+
+		Promise.all(activities)
+			.then(() => cbk(),
+				() => bootbox.alert(`An error has occured.`))
 	}
 }

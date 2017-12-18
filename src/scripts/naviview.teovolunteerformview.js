@@ -1,6 +1,6 @@
 /* exported TEOVolunteerFormView */
-/* global baseEntityUrl baseUploadSubmitUrl baseUploadUrl CotForm2 moment Mustache NaviView baseUploadKeepUrl CotSession */
-
+/* global baseEntityUrl baseUploadSubmitUrl baseUploadUrl CotForm2 moment */
+/* global Mustache NaviView CotSession baseBinUtilUrl */
 class TEOVolunteerFormView extends NaviView {
 	constructor(sourceKey, instanceKey, navi, initOptions) {
 		super(sourceKey, instanceKey, navi, initOptions);
@@ -54,7 +54,7 @@ class TEOVolunteerFormView extends NaviView {
 			rootPath: '',
 			success: (e) => {
 				e.preventDefault();
-				this.submit();
+				// this.submit();
 				return false;
 			},
 			useBinding: true,
@@ -367,27 +367,20 @@ class TEOVolunteerFormView extends NaviView {
 						title: 'Forms',
 						type: 'checkbox',
 						choices: [{
-								text: 'Application'
-							},
-							{
-								text: 'Reference'
-							},
-							{
-								text: 'Media release'
-							},
-							{
-								text: 'Boundary form'
-							},
-							{
-								text: 'Roles & responsibilities'
-							},
-							{
-								text: 'Emergecy contact'
-							},
-							{
-								text: 'Waiver'
-							}
-						],
+							text: 'Application'
+						}, {
+							text: 'Reference'
+						}, {
+							text: 'Media release'
+						}, {
+							text: 'Boundary form'
+						}, {
+							text: 'Roles & responsibilities'
+						}, {
+							text: 'Emergecy contact'
+						}, {
+							text: 'Waiver'
+						}],
 						orientation: 'horizontal',
 						bindTo: 'vForms'
 					}]
@@ -433,9 +426,7 @@ class TEOVolunteerFormView extends NaviView {
 				<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
 				<button type="button" class="btn btn-success btn-save" style="margin: 0;">Create</button>
 			</p>
-
 			<div class="` + this.className + `_formWrapper"></div>
-
 			<p>
 				<button type="button" class="btn btn-primary btn-cancel" style="margin: 0;">Cancel</button>
 				<button type="button" class="btn btn-success btn-save" style="margin: 0;">Create</button>
@@ -455,19 +446,21 @@ class TEOVolunteerFormView extends NaviView {
 			$('#' + _this.className + '_vForm').trigger('submit');
 		});
 
-		let model = new CotModel({
-
+		const model = new CotModel({
 			vDateSubmitted: moment().format('M/D/YYYY h:m A'),
 			vGraduate: 'No',
 			vAppStatus: 'New',
 			vAODA: 'No'
-
 		});
+
+		const originalData = model.toJSON();
+
 		this.formDef.success = function(e) {
 			e.preventDefault();
-			_this.submit(model);
+			_this.submit(model, originalData);
 			return false;
 		}
+
 		this.form = new CotForm2(this.formDef);
 		this.form.render('.' + this.className + '_formWrapper');
 		this.form.setModel(model);
@@ -526,7 +519,7 @@ class TEOVolunteerFormView extends NaviView {
 
 			_this.formDef.success = function(e) {
 				e.preventDefault();
-				_this.submit(model);
+				_this.submit(model, originalData);
 				originalData = model.toJSON();
 				return false;
 			}
@@ -554,6 +547,8 @@ class TEOVolunteerFormView extends NaviView {
 		const _this = this;
 
 		function renderViewVolunteer(model) {
+			console.log('MODEL', model.toJSON());
+
 			const previewFormDef = $.extend(true, {}, _this.formDef);
 			previewFormDef.useBinding = false;
 			for (var i1 = 0, l1 = previewFormDef.sections.length; i1 < l1; i1++) {
@@ -848,7 +843,7 @@ class TEOVolunteerFormView extends NaviView {
 		}, true);
 	}
 
-	submit(model) {
+	submit(model, originalData) {
 		this.initOptions.cotLogin.isLoggedIn((result) => {
 			if (result != CotSession.LOGIN_CHECK_RESULT_TRUE) {
 				this.initOptions.cotLogin.logout();
@@ -870,14 +865,14 @@ class TEOVolunteerFormView extends NaviView {
 								}
 								return {
 									bin_id: bin_id,
-									name: file.name,
-									size: file.size,
+									name:   file.name,
+									size:   file.size,
 									status: file.status,
-									type: file.type
+									type:   file.type
 								}
 							});
 							model.set('vAttachments', json.vAttachments);
-							this.keepFiles(json.vAttachments, () => {
+							this.keepFiles(json.vAttachments, originalData.vAttachments, () => {
 								resolve();
 							});
 						} else {
@@ -896,6 +891,7 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	putRecord(json, fromPost) {
+		console.log('PUT RECORD', json)
 		$(':input').prop('disabled', true);
 
 		const url = `${baseEntityUrl}/Volunteer('${this.id}')`;
@@ -964,6 +960,7 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	postRecord(json) {
+		console.log('POST RECORD', json);
 		$(':input').prop('disabled', true);
 
 		$.ajax(`${baseEntityUrl}/Volunteer`, {
@@ -1005,6 +1002,7 @@ class TEOVolunteerFormView extends NaviView {
 						data.vDateApproved = moment(data.vDateApproved).isValid() ? moment(data.vDateApproved).format('MM/DD/YYYY') : '';
 						data.vDateSubmitted = moment(data.vDateSubmitted).isValid() ? moment(data.vDateSubmitted).format('MM/DD/YYYY') : '';
 						data.vGradDate = moment(data.vGradDate).isValid() ? moment(data.vGradDate).format('MM/DD/YYYY') : '';
+						console.log('GET RECORD', data);
 						callback(data);
 					}
 				});
@@ -1014,17 +1012,43 @@ class TEOVolunteerFormView extends NaviView {
 
 	updateRelatedRecord() {}
 
-	keepFiles(attachments, cbk) {
-		const url = baseUploadKeepUrl + attachments.map((attachment) => attachment.bin_id).join(',');
-		$.ajax(url, {
-			data: JSON.stringify({}),
-			error: (jqXHR, textStatus, errorThrown) => {
-				bootbox.alert(`An error has occured. ${errorThrown}`);
-			},
-			method: 'GET',
-			success: () => {
-				cbk();
+	keepFiles(attachments, originalAttachments, cbk) {
+		const activities = [];
+
+		const deletables = originalAttachments.filter((attachment) => {
+			const l = attachments.length;
+			for (let i = 0; i < l; i++) {
+				if (attachments[i].bin_id === attachment.bin_id) {
+					return false
+				}
 			}
-		});
+			return true
+		})
+		const dl = deletables.length
+		for (let i = 0; i < dl; i++) {
+			activities.push(new Promise((resolve, reject) => {
+				$.ajax(`${baseBinUtilUrl}/${deletables[i].bin_id}/delete?sid=${this.initOptions.cotLogin.sid}`, {
+					error: (jqXHR, textStatus, errorThrown) => { reject(errorThrown) },
+					method: 'GET',
+					success: (data) => { resolve(data) }
+				})
+			}))
+		}
+
+		const keepable = attachments.filter((attachment) => attachment.status === 'success')
+		const kl = keepable.length;
+		for (let i = 0; i < kl; i++) {
+			activities.push(new Promise((resolve, reject) => {
+				$.ajax(`${baseBinUtilUrl}/${keepable[i].bin_id}/keep?sid=${this.initOptions.cotLogin.sid}`, {
+					error: (jqXHR, textStatus, errorThrown) => { reject(errorThrown) },
+					method: 'GET',
+					success: (data) => { resolve(data) }
+				})
+			}))
+		}
+
+		Promise.all(activities)
+			.then(() => cbk(),
+				() => bootbox.alert(`An error has occured.`))
 	}
 }

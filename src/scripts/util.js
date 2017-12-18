@@ -1,4 +1,4 @@
-/* exported CotForm2 CotLoginExt DataTablesODataBridge loginGate */
+/* exported CotForm2 CotLoginExt DataTablesODataBridge loginGate keepFiles */
 /* global CotForm CotDropzone CotSession */
 cot_form.prototype.dropzoneFieldRender = function(originalfield) {
 	var field = $.extend(true, {}, originalfield);
@@ -477,6 +477,20 @@ function loginGate(cotLogin) {
 					reject();
 				}
 			})
+		}
+	});
+}
+
+function keepFiles(attachments, cbk) {
+	const url = baseUploadKeepUrl + attachments.map((attachment) => attachment.bin_id).join(',');
+	$.ajax(url, {
+		data: JSON.stringify({}),
+		error: (jqXHR, textStatus, errorThrown) => {
+			bootbox.alert(`An error has occured. ${errorThrown}`);
+		},
+		method: 'GET',
+		success: () => {
+			cbk();
 		}
 	});
 }
