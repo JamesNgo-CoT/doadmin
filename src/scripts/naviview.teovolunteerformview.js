@@ -505,7 +505,7 @@ class TEOVolunteerFormView extends NaviView {
 
 			$('.btn-done', _this.$topRegion).on('click', function(e) {
 				e.preventDefault();
-				console.log('DONE BUTTON CLICK - SHOW OPTIION DATA:', originalData)
+				// console.log('DONE BUTTON CLICK - SHOW OPTIION DATA:', originalData)
 				_this.show({
 					operation: 'view',
 					data: originalData,
@@ -522,7 +522,7 @@ class TEOVolunteerFormView extends NaviView {
 				e.preventDefault();
 				_this.submit(model, originalData);
 				// originalData = model.toJSON();
-				console.log('SET ORIGINAL DATA', originalData, 'FROM', model.toJSON())
+				// console.log('SET ORIGINAL DATA', originalData, 'FROM', model.toJSON())
 				return false;
 			}
 			_this.form = new CotForm2(_this.formDef);
@@ -549,7 +549,7 @@ class TEOVolunteerFormView extends NaviView {
 		const _this = this;
 
 		function renderViewVolunteer(model) {
-			console.log('VIEW MODEL', model.toJSON());
+			// console.log('VIEW MODEL', model.toJSON());
 
 			const previewFormDef = $.extend(true, {}, _this.formDef);
 			previewFormDef.useBinding = false;
@@ -765,11 +765,11 @@ class TEOVolunteerFormView extends NaviView {
 		}
 
 		if (showOpts.data) {
-			console.log('USING EXISTING DATA', showOpts.data);
+			// console.log('USING EXISTING DATA', showOpts.data);
 			renderViewVolunteer(new CotModel(showOpts.data));
 		} else if (showOpts.id) {
 			this.getRecord(showOpts.id, function(data) {
-				console.log('USING RECORD DATA', data);
+				// console.log('USING RECORD DATA', data);
 				renderViewVolunteer(new CotModel(data));
 				_this.navi.render();
 			});
@@ -884,7 +884,7 @@ class TEOVolunteerFormView extends NaviView {
 							resolve();
 						}
 					}).then(() => {
-						console.log('SUBMIT', json);
+						// console.log('SUBMIT', json);
 						if (this.id) {
 							this.putRecord(json, false);
 						} else {
@@ -897,7 +897,7 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	putRecord(json, fromPost) {
-		console.log('PUT RECORD', json)
+		// console.log('PUT RECORD', json)
 		$(':input').prop('disabled', true);
 
 		const url = `${baseEntityUrl}/Volunteer('${this.id}')`;
@@ -910,8 +910,8 @@ class TEOVolunteerFormView extends NaviView {
 			vAppStatus: json.vAppStatus,
 			vAttachments: json.vAttachments,
 			vCity: json.vCity,
-			vDateApproved: moment(json.vDateApproved).isValid() ? moment(json.vDateApproved).utc().format() : null,
-			vDateSubmitted: moment(json.vDateSubmitted).isValid() ? moment(json.vDateSubmitted).utc().format() : null,
+			vDateApproved: json.vDateApproved && moment(json.vDateApproved).isValid() ? moment(json.vDateApproved).utc().format() : null,
+			vDateSubmitted: json.vDateSubmitted && moment(json.vDateSubmitted).isValid() ? moment(json.vDateSubmitted).utc().format() : null,
 			vEmail: json.vEmail,
 			vEmergName: json.vEmergName,
 			vEmergPhone: json.vEmergPhone,
@@ -919,7 +919,7 @@ class TEOVolunteerFormView extends NaviView {
 			vEmergRel: json.vEmergRel,
 			vFName: json.vFName,
 			vForms: json.vForms,
-			vGradDate: moment(json.vGradDate).isValid() ? moment(json.vGradDate).utc().format() : null,
+			vGradDate: json.vGradDate && moment(json.vGradDate).isValid() ? moment(json.vGradDate).utc().format() : null,
 			vGraduate: json.vGraduate,
 			vLName: json.vLName,
 			vLang: json.vLang,
@@ -952,6 +952,9 @@ class TEOVolunteerFormView extends NaviView {
 			success: (data) => {
 				if (fromPost) {
 					bootbox.alert('Volunteer Added');
+					data.vDateApproved = data.vDateApproved && moment(data.vDateApproved).isValid() ? moment(data.vDateApproved).format('MM/DD/YYYY') : '';
+					data.vDateSubmitted = data.vDateSubmitted && moment(data.vDateSubmitted).isValid() ? moment(data.vDateSubmitted).format('MM/DD/YYYY') : '';
+					data.vGradDate = data.vGradDate && moment(data.vGradDate).isValid() ? moment(data.vGradDate).format('MM/DD/YYYY') : '';
 					this.show({
 						operation: 'update',
 						data: data,
@@ -966,7 +969,7 @@ class TEOVolunteerFormView extends NaviView {
 	}
 
 	postRecord(json) {
-		console.log('POST RECORD', json);
+		// console.log('POST RECORD', json);
 		$(':input').prop('disabled', true);
 
 		$.ajax(`${baseEntityUrl}/Volunteer`, {
@@ -1005,10 +1008,10 @@ class TEOVolunteerFormView extends NaviView {
 					},
 					method: 'GET',
 					success: (data) => {
-						data.vDateApproved = moment(data.vDateApproved).isValid() ? moment(data.vDateApproved).format('MM/DD/YYYY') : '';
-						data.vDateSubmitted = moment(data.vDateSubmitted).isValid() ? moment(data.vDateSubmitted).format('MM/DD/YYYY') : '';
-						data.vGradDate = moment(data.vGradDate).isValid() ? moment(data.vGradDate).format('MM/DD/YYYY') : '';
-						console.log('GET RECORD', data);
+						data.vDateApproved = data.vDateApproved && moment(data.vDateApproved).isValid() ? moment(data.vDateApproved).format('MM/DD/YYYY') : '';
+						data.vDateSubmitted = data.vDateSubmitted && moment(data.vDateSubmitted).isValid() ? moment(data.vDateSubmitted).format('MM/DD/YYYY') : '';
+						data.vGradDate = data.vGradDate && moment(data.vGradDate).isValid() ? moment(data.vGradDate).format('MM/DD/YYYY') : '';
+						// console.log('GET RECORD', data);
 						callback(data);
 					}
 				});

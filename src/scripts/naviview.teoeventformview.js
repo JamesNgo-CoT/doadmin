@@ -622,7 +622,7 @@ class TEOEventFormView extends NaviView {
 				eContEmail: data.eContEmail,
 				eContName: data.eContName,
 				eContPhone: data.eContPhone,
-				eDate: moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
+				eDate: data.eDate && moment(data.eDate).isValid() ? moment(data.eDate).utc().format() : null,
 				eHours: data.eHours,
 				eKey: data.eKey || this.id,
 				eLocation: data.eLocation,
@@ -653,6 +653,7 @@ class TEOEventFormView extends NaviView {
 				method: 'PUT',
 				success: () => { // (data, textStatus, jqXHR) {
 					if (fromPost) {
+						data.eDate = data.eDate && moment(data.eDate).isValid() ? moment(data.eDate).format('l') : '';
 						this.show({
 							operation: 'update',
 							data: data,
@@ -781,7 +782,7 @@ class TEOEventFormView extends NaviView {
 					},
 					method: 'GET',
 					success: (data) => {
-						data.eDate = moment(data.eDate).isValid() ? moment(data.eDate).format('l') : '';
+						data.eDate = data.eDate && moment(data.eDate).isValid() ? moment(data.eDate).format('l') : '';
 						callback(data);
 					}
 				});
@@ -839,7 +840,7 @@ class TEOEventFormView extends NaviView {
 	// }
 
 	keepFiles(attachments, originalAttachments, cbk) {
-		console.log(attachments, originalAttachments);
+		// console.log(attachments, originalAttachments);
 
 		const activities = [];
 

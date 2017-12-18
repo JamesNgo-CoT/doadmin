@@ -154,7 +154,7 @@ class TEOAdministrationView extends NaviView {
 
 	action_getConfig(cbk) {
 		const _this = this;
-		const url = baseConfigUrl + '(\'TEOVolunteer/administration.json\')?$format=application/json';
+		const url = baseConfigUrl + '(\'live_green_volunteer/administration.json\')?$format=application/json';
 		$.ajax(url, {
 			headers: {
 				'Authorization': 'AuthSession ' + _this.initOptions.cotLogin.sid

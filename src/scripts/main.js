@@ -1,13 +1,11 @@
 /* exported baseConfigUrl baseEntityUrl baseUploadUrl baseURL baseUploadSubmitUrl baseUploadKeepUrl baseBinUtilUrl */
 /* global NaviBar CotLoginExt */
 
-const baseURL = 'https://was-intra-sit.toronto.ca'; // 'https://insideto-secure.toronto.ca'; // 'https://was-intra-sit.toronto.ca';
+const baseURL = ''; // 'https://insideto-secure.toronto.ca'; // 'https://was-intra-sit.toronto.ca';
 const baseEntityUrl = baseURL + '/c3api_data/v2/DataAccess.svc/live_green_volunteer';
 const baseConfigUrl = baseURL + '/c3api_config/v2/ConfigService.svc/ConfigSet';
 const baseUploadUrl = baseURL + '/cc_sr_admin_v1/upload/live_green_volunteer';
-// const baseUploadUrl = baseURL + '/cc_sr_admin_v1/upload/jngo2';
 const baseUploadSubmitUrl = baseURL + '/cc_sr_admin_v1/upload/live_green_volunteer/live_green_volunteer';
-// const baseUploadSubmitUrl = baseURL + '/cc_sr_admin_v1/upload/jngo2/jngo2';
 const baseUploadKeepUrl = baseURL + '/cc_sr_admin_v1/submit/live_green_volunteer?keepFiles=';
 const baseBinUtilUrl = baseURL + '/cc_sr_admin_v1/submit/binUtils/live_green_volunteer'
 
