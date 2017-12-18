@@ -1,5 +1,5 @@
 /* exported TEOEventFormView */
-/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl baseUploadKeepUrl CotSession */
+/* global NaviView CotForm2 moment Mustache baseEntityUrl baseUploadSubmitUrl baseUploadUrl CotSession */
 /* global baseBinUtilUrl */
 
 class TEOEventFormView extends NaviView {
